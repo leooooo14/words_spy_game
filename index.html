@@ -1,0 +1,234 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Player Selection</title>
+    <style>
+        /* Base styles */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Container for the game interface */
+        .game-container {
+            background-color: white;
+            width: 50vh;
+            height: 65vh;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            position: relative;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        /* Title styling */
+        h1 {
+            text-align: center;
+            font-size: 24px;
+            margin-top: 10px;
+            margin-bottom: 30px;
+        }
+
+        /* Player count controls */
+        .player-count-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        .spies-count-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .count-btn {
+            width: 32px;
+            height: 32px;
+            background-color: #e0e0e0;
+            border: 2px solid #333;
+            border-radius: 5px;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.2s ease;
+        }
+
+        .count-btn:hover {
+            background-color: #d0d0ff;
+            transform: scale(1.05);
+        }
+
+        .count-btn:active {
+            transform: scale(0.95);
+        }
+
+        .count {
+            width: 40px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            margin: 0 20px;
+        }
+
+        /* Player name fields */
+        .player-fields-container {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-bottom: 30px;
+        }
+
+        .player-field {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .player-label {
+            width: 100px;
+            font-weight: bold;
+            text-align: right;
+            margin-right: 10px;
+            font-size: 16px;
+        }
+
+        .player-input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 2px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: all 0.2s ease;
+        }
+
+        .player-input:hover {
+            border-color: #999;
+        }
+
+        .player-input:focus {
+            border-color: #6495ED;
+            background-color: #f0f8ff;
+            outline: none;
+            box-shadow: 0 0 5px rgba(100, 149, 237, 0.5);
+        }
+
+        /* Confirm button */
+        .confirm-btn {
+            display: block;
+            width: 120px;
+            height: 40px;
+            background-color: #e0e0e0;
+            border: 2px solid #333;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 0 auto;
+            transition: all 0.2s ease;
+        }
+
+        .confirm-btn:hover {
+            background-color: #d0d0ff;
+            transform: scale(1.05);
+        }
+
+        .confirm-btn:active {
+            transform: scale(0.95);
+        }
+
+
+        /* Background particles */
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.3;
+            z-index: -1;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes floatParticle {
+            0% { transform: translate(0, 0); }
+            50% { transform: translate(var(--translate-x), var(--translate-y)); }
+            100% { transform: translate(0, 0); }
+        }
+
+        @keyframes pulseCount {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        .pulse {
+            animation: pulseCount 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container" id="gameContainer">
+        <h1>Select Number of Players</h1>
+        
+        <div class="player-count-container">
+            <button class="count-btn" id="p_decreaseBtn">-</button>
+            <div class="count" id="playerCount">3</div>
+            <button class="count-btn" id="p_increaseBtn">+</button>
+        </div>
+        
+        <div class="player-fields-container" id="playerFields">
+            <!-- Player fields will be added here by JavaScript -->
+        </div>
+        
+        <h1>Select Number of Spies</h1>
+        <div class="spies-count-container">
+            <button class="count-btn" id="s_decreaseBtn">-</button>
+            <div class="count" id="spiesCount">1</div>
+            <button class="count-btn" id="s_increaseBtn">+</button>
+        </div>
+
+        <button class="confirm-btn" id="confirmBtn">Confirm</button>
+        
+        <h1>Select the word topics</h1>
+        <div class="topics-container" id="topicsContainer">
+            <div class="topic-item">
+                <input type="checkbox" id="topic-geography" class="topic-checkbox" value="geography" checked>
+                <label for="topic-geography" class="topic-label">Geografia</label>
+            </div>
+            <div class="topic-item">
+                <input type="checkbox" id="topic-filmtv" class="topic-checkbox" value="filmtv" checked>
+                <label for="topic-filmtv" class="topic-label">Film e TV</label>
+            </div>
+            <div class="topic-item">
+                <input type="checkbox" id="topic-disney" class="topic-checkbox" value="disney" checked>
+                <label for="topic-disney" class="topic-label">Disney e Pixar</label>
+            </div>
+        </div>
+        
+
+    </div>
+    
+
+
+
+    <script src="game.js"></script>
+
+</body>
+
+</html>
