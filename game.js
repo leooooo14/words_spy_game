@@ -349,9 +349,9 @@ document.addEventListener('DOMContentLoaded', function() {
         return new Promise((resolve, reject) => {
             // Define file URLs
             const fileUrls = {
-                geography: 'geografia.txt',
-                filmtv: 'filmtv.txt',
-                disney: 'disney.txt'
+                geography: './data/geografia.txt',
+                filmtv: './data/filmtv.txt',
+                disney: './data/disney.txt'
             };
             
             // Load all files
