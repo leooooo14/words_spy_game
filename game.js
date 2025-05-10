@@ -4,9 +4,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const MAX_PLAYERS = 15;
     const MIN_SPIES = 1;
     const DEFAULT_PLAYER_NAMES = [
-        "Player1", "Player2", "Player3", "Player4", "Player5", 
-        "Player6", "Player7", "Player8", "Player9", "Player10",
-        "Player11", "Player12", "Player13", "Player14", "Player15"
+        "Player 1", "Player 2", "Player 3", "Player 4", "Player 5", 
+        "Player 6", "Player 7", "Player 8", "Player 9", "Player 10",
+        "Player 11", "Player 12", "Player 13", "Player 14", "Player 15"
     ];
     
     // Game state
@@ -18,34 +18,46 @@ document.addEventListener('DOMContentLoaded', function() {
         currentPlayerIndex: 0,
         selectedTopics: ["geography", "filmtv", "disney"],
         topicWords: {
-            geography: [],
-            filmtv: [],
-            disney: []
+            geography: [
+                "Mount Everest", "Nile River", "Amazon Rainforest", 
+                "Great Barrier Reef", "Grand Canyon", "Sahara Desert", 
+                "Venice", "Great Wall of China", "Machu Picchu", "Eiffel Tower"
+            ],
+            filmtv: [
+                "Star Wars", "Game of Thrones", "Titanic", 
+                "Breaking Bad", "The Matrix", "Stranger Things", 
+                "Jurassic Park", "Harry Potter", "The Simpsons", "Avengers"
+            ],
+            disney: [
+                "Mickey Mouse", "Lion King", "Frozen", 
+                "Finding Nemo", "Toy Story", "Aladdin", 
+                "Beauty and the Beast", "Moana", "The Little Mermaid", "Inside Out"
+            ]
         },
         topicNames: {
             geography: "Geografia",
             filmtv: "Film e TV",
             disney: "Disney e Pixar"
         },
-        currentRound: 1,
-        currentTopic: "",
         currentWord: "",
+        currentTopic: "",
         usedWords: [],
-        isLoading: true
+        timer: {
+            minutes: 10,
+            seconds: 0,
+            interval: null,
+            isRunning: false
+        }
     };
     
     // DOM Elements - Screens
     const screens = {
         playerSetup: document.getElementById('playerSetupScreen'),
-        topicSelection: document.getElementById('topicSelectionScreen'),
-        spyReveal: document.getElementById('spyRevealScreen'),
-        gameTurn: document.getElementById('gameTurnScreen')
+        playerPass: document.getElementById('playerPassScreen'),
+        playerRole: document.getElementById('playerRoleScreen'),
+        gamePlay: document.getElementById('gamePlayScreen'),
+        gameEnd: document.getElementById('gameEndScreen')
     };
-    
-    // DOM Elements - Loading
-    const loadingOverlay = document.getElementById('loadingOverlay');
-    const fileInputArea = document.getElementById('fileInputArea');
-    // const loadFilesBtn = document.getElementById('loadFilesBtn');
     
     // DOM Elements - Player Setup
     const p_decreaseBtn = document.getElementById('p_decreaseBtn');
@@ -55,22 +67,35 @@ document.addEventListener('DOMContentLoaded', function() {
     const s_decreaseBtn = document.getElementById('s_decreaseBtn');
     const s_increaseBtn = document.getElementById('s_increaseBtn');
     const spiesCount = document.getElementById('spiesCount');
-    const toTopicsBtn = document.getElementById('toTopicsBtn');
-    
-    // DOM Elements - Topic Selection
     const startGameBtn = document.getElementById('startGameBtn');
     
-
-    // DOM Elements - Game Turn
-    const selectedTopic = document.getElementById('selectedTopic');
-    const selectedWord = document.getElementById('selectedWord');
-    const newWordBtn = document.getElementById('newWordBtn');
-    const endGameBtn = document.getElementById('endGameBtn');
+    // DOM Elements - Player Pass
+    const currentPlayerName = document.getElementById('currentPlayerName');
+    const readyBtn = document.getElementById('readyBtn');
     
+    // DOM Elements - Player Role
+    const citizenRole = document.getElementById('citizenRole');
+    const spyRole = document.getElementById('spyRole');
+    const wordDisplay = document.getElementById('wordDisplay');
+    const topicDisplay = document.getElementById('topicDisplay');
+    const gotItBtn = document.getElementById('gotItBtn');
     
+    // DOM Elements - Game Play
+    const timerDisplay = document.getElementById('timerDisplay');
+    const timerBtn = document.getElementById('timerBtn');
+    const revealSpiesBtn = document.getElementById('revealSpiesBtn');
+    
+    // DOM Elements - Game End
+    const finalWordDisplay = document.getElementById('finalWordDisplay');
+    const finalTopicDisplay = document.getElementById('finalTopicDisplay');
+    const spyListDisplay = document.getElementById('spyListDisplay');
+    const newGameBtn = document.getElementById('newGameBtn');
     
     // Create background particles
     createParticles();
+    
+    // Initialize player fields
+    updatePlayerFields();
     
     // Event Listeners - Player Setup
     p_decreaseBtn.addEventListener('click', function() {
@@ -118,101 +143,88 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    toTopicsBtn.addEventListener('click', function() {
-        showScreen('topicSelection');
-    });
-    
-    // Event Listeners - Topic Selection
-    backToPlayersBtn.addEventListener('click', function() {
-        showScreen('playerSetup');
-    });
-    
-
-    
-    // Starting the game
-    // Event Listeners - Topic Selection
+    // Event Listeners - Start Game
     startGameBtn.addEventListener('click', function() {
-        // Get selected topics
-        gameState.selectedTopics = [];
+        // Check if at least one topic is selected
+        const selectedTopics = [];
         document.querySelectorAll('.topic-checkbox:checked').forEach(checkbox => {
-            gameState.selectedTopics.push(checkbox.value);
+            selectedTopics.push(checkbox.value);
         });
         
-        if (gameState.selectedTopics.length === 0) {
+        if (selectedTopics.length === 0) {
             alert('Please select at least one topic.');
             return;
         }
         
-        // Show loading overlay
-        loadingOverlay.style.display = 'flex';
+        // Update selected topics
+        gameState.selectedTopics = selectedTopics;
         
-        // Load only the selected topic files
-        loadSelectedTopics(gameState.selectedTopics)
-            .then(() => {
-                // Prepare for the game
-                prepareGame();
-                
-                // Hide loading overlay
-                hideLoading();
-                
-                // Start with the spy reveal
-                showScreen('spyReveal');
-                startSpyReveal();
-            })
-            .catch(error => {
-                console.error('Error loading topic files:', error);
-                alert('Error loading topic files. Please try again.');
-                hideLoading();
-            });
+        // Update player names
+        document.querySelectorAll('.player-input').forEach((input, index) => {
+            gameState.players[index] = input.value || `Player ${index + 1}`;
+        });
+        
+        // Prepare the game
+        prepareGame();
+        
+        // Start with the player pass screen
+        gameState.currentPlayerIndex = 0;
+        startPlayerPass();
     });
-
-
-
-    // Event Listeners - Spy Reveal
-    showRoleBtn.addEventListener('click', function() {
-        roleInfo.style.display = 'block';
-        showRoleBtn.style.display = 'none';
+    
+    // Event Listeners - Player Pass
+    readyBtn.addEventListener('click', function() {
+        showScreen('playerRole');
+        showPlayerRole();
+    });
+    
+    // Event Listeners - Player Role
+    gotItBtn.addEventListener('click', function() {
+        // Move to the next player or to the game play
+        gameState.currentPlayerIndex++;
         
-        // Show the appropriate buttons
-        if (gameState.currentPlayerIndex < gameState.numPlayers - 1) {
-            nextPlayerBtn.style.display = 'block';
+        if (gameState.currentPlayerIndex < gameState.numPlayers) {
+            // More players to reveal
+            startPlayerPass();
         } else {
-            startTurnBtn.style.display = 'block';
+            // All players have seen their roles
+            showScreen('gamePlay');
+            resetTimer();
         }
     });
     
-    nextPlayerBtn.addEventListener('click', function() {
-        gameState.currentPlayerIndex++;
-        showSpyReveal();
+    // Event Listeners - Game Play
+    timerBtn.addEventListener('click', function() {
+        if (gameState.timer.isRunning) {
+            // Stop the timer
+            clearInterval(gameState.timer.interval);
+            gameState.timer.isRunning = false;
+            timerBtn.textContent = 'Start Timer';
+        } else {
+            // Start the timer
+            gameState.timer.interval = setInterval(updateTimer, 1000);
+            gameState.timer.isRunning = true;
+            timerBtn.textContent = 'Stop Timer';
+        }
+    });
+    
+    revealSpiesBtn.addEventListener('click', function() {
+        // Stop the timer if it's running
+        if (gameState.timer.isRunning) {
+            clearInterval(gameState.timer.interval);
+            gameState.timer.isRunning = false;
+        }
         
-        // Reset the reveal screen
-        roleInfo.style.display = 'none';
-        showRoleBtn.style.display = 'block';
-        nextPlayerBtn.style.display = 'none';
-        startTurnBtn.style.display = 'none';
+        // Show the game end screen
+        showGameEnd();
     });
     
-    startTurnBtn.addEventListener('click', function() {
-        showScreen('gameTurn');
-        startGameTurn();
+    // Event Listeners - Game End
+    newGameBtn.addEventListener('click', function() {
+        // Reset the game and show the player setup screen
+        resetGame();
+        showScreen('playerSetup');
     });
-    
-    // Event Listeners - Game Turn
-    newWordBtn.addEventListener('click', function() {
-        selectRandomWord();
-    });
-    
-    endGameBtn.addEventListener('click', function() {
-        // Reset the game
-        gameState.currentRound++;
-        gameState.currentPlayerIndex = 0;
-        gameState.spyIndices = [];
-        gameState.usedWords = [];
-        
-        // Go back to topic selection for a new round
-        showScreen('topicSelection');
-    });
-    
     
     function updatePlayerFields() {
         // Clear existing fields
@@ -230,7 +242,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const playerInput = document.createElement('input');
             playerInput.type = 'text';
             playerInput.className = 'player-input';
-            playerInput.value = gameState.players[i] || `Player${i + 1}`;
+            playerInput.value = gameState.players[i] || `Player ${i + 1}`;
             playerInput.maxLength = 15;
             playerInput.dataset.playerIndex = i;
             
@@ -246,6 +258,16 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
+    function showScreen(screenName) {
+        // Hide all screens
+        Object.values(screens).forEach(screen => {
+            screen.classList.remove('active');
+        });
+        
+        // Show the requested screen
+        screens[screenName].classList.add('active');
+    }
+    
     function prepareGame() {
         // Assign spy roles
         gameState.spyIndices = [];
@@ -258,10 +280,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
         
-        // Reset player reveal index
-        gameState.currentPlayerIndex = 0;
-        
-        // Select a random word from selected topics
+        // Select a random word
         selectRandomWord();
     }
     
@@ -273,7 +292,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         
         // Filter out used words
-        const availableWords = allWords.filter(word => !gameState.usedWords.includes(word));
+        let availableWords = allWords.filter(word => !gameState.usedWords.includes(word));
         
         // If all words have been used, reset the used words array
         if (availableWords.length === 0) {
@@ -298,24 +317,118 @@ document.addEventListener('DOMContentLoaded', function() {
         gameState.currentWord = word;
         gameState.currentTopic = wordTopic;
         gameState.usedWords.push(word);
+    }
+    
+    function startPlayerPass() {
+        // Show the player pass screen
+        showScreen('playerPass');
         
-        // Update display if we're on the game turn screen
-        if (screens.gameTurn.classList.contains('active')) {
-            selectedWord.textContent = word;
-            selectedTopic.textContent = gameState.topicNames[wordTopic];
-            
-            // Reset animation
-            selectedWord.style.animation = 'none';
-            setTimeout(() => {
-                selectedWord.style.animation = 'pulse 1s ease-in-out';
-            }, 10);
+        // Update the player name
+        currentPlayerName.textContent = gameState.players[gameState.currentPlayerIndex];
+    }
+    
+    function showPlayerRole() {
+        // Hide both role divs initially
+        citizenRole.style.display = 'none';
+        spyRole.style.display = 'none';
+        
+        // Check if the current player is a spy
+        const isSpy = gameState.spyIndices.includes(gameState.currentPlayerIndex);
+        
+        if (isSpy) {
+            // Show spy role
+            spyRole.style.display = 'block';
+        } else {
+            // Show citizen role with the word
+            citizenRole.style.display = 'block';
+            wordDisplay.textContent = gameState.currentWord;
+            topicDisplay.textContent = `Topic: ${gameState.topicNames[gameState.currentTopic]}`;
         }
     }
     
+    function resetTimer() {
+        // Reset timer values
+        gameState.timer.minutes = 10;
+        gameState.timer.seconds = 0;
+        gameState.timer.isRunning = false;
+        
+        // Update display
+        timerDisplay.textContent = '10:00';
+        timerBtn.textContent = 'Start Timer';
+        
+        // Clear any existing intervals
+        if (gameState.timer.interval) {
+            clearInterval(gameState.timer.interval);
+        }
+    }
+    
+    function updateTimer() {
+        // Decrease seconds
+        gameState.timer.seconds--;
+        
+        // Handle minute change
+        if (gameState.timer.seconds < 0) {
+            gameState.timer.minutes--;
+            gameState.timer.seconds = 59;
+        }
+        
+        // Check if timer is done
+        if (gameState.timer.minutes < 0) {
+            clearInterval(gameState.timer.interval);
+            gameState.timer.isRunning = false;
+            timerBtn.textContent = 'Time\'s Up!';
+            timerBtn.disabled = true;
+            return;
+        }
+        
+        // Update display
+        const minutesStr = gameState.timer.minutes.toString().padStart(2, '0');
+        const secondsStr = gameState.timer.seconds.toString().padStart(2, '0');
+        timerDisplay.textContent = `${minutesStr}:${secondsStr}`;
+    }
+    
+    function showGameEnd() {
+        // Show the game end screen
+        showScreen('gameEnd');
+        
+        // Display the word and topic
+        finalWordDisplay.textContent = gameState.currentWord;
+        finalTopicDisplay.textContent = `Topic: ${gameState.topicNames[gameState.currentTopic]}`;
+        
+        // Show the spies
+        spyListDisplay.innerHTML = '';
+        spyListDisplay.style.display = 'block';
+        
+        if (gameState.spyIndices.length > 0) {
+            gameState.spyIndices.forEach(spyIndex => {
+                const spyName = gameState.players[spyIndex];
+                const spyElement = document.createElement('div');
+                spyElement.textContent = spyName;
+                spyListDisplay.appendChild(spyElement);
+            });
+        } else {
+            spyListDisplay.textContent = 'No spies in this game!';
+        }
+    }
+    
+    function resetGame() {
+        // Reset game state
+        gameState.currentPlayerIndex = 0;
+        gameState.spyIndices = [];
+        
+        // Stop timer if running
+        if (gameState.timer.isRunning) {
+            clearInterval(gameState.timer.interval);
+            gameState.timer.isRunning = false;
+        }
+        
+        // Re-enable timer button
+        timerBtn.disabled = false;
+    }
     
     function createParticles() {
         // Create floating background particles
-        const numParticles = 50;
+        const numParticles = 30;
         const colors = [
             '#4682b4', '#dc143c', '#32cd32', 
             '#ffa500', '#8a2be2', '#1e90ff'
