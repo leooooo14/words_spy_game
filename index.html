@@ -23,7 +23,7 @@
         .game-container {
             background-color: white;
             width: 50vh;
-            height: 65vh;
+            height: fit-content;
             border-radius: 10px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             position: relative;
@@ -106,6 +106,14 @@
             font-size: 16px;
         }
 
+        .topic-label {
+            width: 100px;
+            font-weight: bold;
+            text-align: right;
+            margin-right: 10px;
+            font-size: 16px;
+        }
+
         .player-input {
             flex: 1;
             padding: 8px 12px;
@@ -141,12 +149,12 @@
             transition: all 0.2s ease;
         }
 
-        .start-game-btn:hover {
+        .startgame-btn:hover {
             background-color: #d0d0ff;
             transform: scale(1.05);
         }
 
-        .confirm-btn:active {
+        .startgame-btn:active {
             transform: scale(0.95);
         }
 
@@ -203,7 +211,6 @@
             <button class="count-btn" id="s_increaseBtn">+</button>
         </div>
 
-        <button class="startgame-btn" id="startGameBtn">Start Game!</button>
         
         <h1>Select the word topics XDXD</h1>
         <div class="topics-container" id="topicsContainer">
@@ -221,6 +228,7 @@
             </div>
         </div>
         
+        <button class="startgame-btn" id="startGameBtn">Start Game!</button>
 
     </div>
     
