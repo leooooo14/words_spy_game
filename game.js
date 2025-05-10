@@ -84,8 +84,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const filmtvFile = document.getElementById('filmtvFile');
     const disneyFile = document.getElementById('disneyFile');
     
-    // Initialize the game
-    initGame();
     
     // Create background particles
     createParticles();
