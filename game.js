@@ -144,25 +144,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
 
-    startGameBtn.addEventListener('click', function() {
-        // Get selected topics
-        gameState.selectedTopics = [];
-        document.querySelectorAll('.topic-checkbox:checked').forEach(checkbox => {
-            gameState.selectedTopics.push(checkbox.value);
-        });
-        
-        if (gameState.selectedTopics.length === 0) {
-            alert('Please select at least one topic.');
-            return;
-        }
-        
-        // Prepare for the game
-        prepareGame();
-        
-        // Start with the spy reveal
-        showScreen('spyReveal');
-        startSpyReveal();
-    });
     
     // Starting the game
     // Event Listeners - Topic Selection
@@ -201,60 +182,6 @@ document.addEventListener('DOMContentLoaded', function() {
             });
     });
 
-    // Function to load selected topics
-    function loadSelectedTopics(selectedTopics) {
-        // Show loading overlay
-        document.getElementById('loadingOverlay').style.display = 'flex';
-        
-        // Create an array of fetch promises for each selected topic
-        const fetchPromises = selectedTopics.map(topic => {
-            const fileMap = {
-                'geography': 'data/geografia.txt',
-                'filmtv': 'data/filmtv.txt',
-                'disney': 'data/disney.txt'
-            };
-            
-            return fetch(fileMap[topic])
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`Failed to load ${fileMap[topic]}`);
-                    }
-                    return response.text();
-                })
-                .then(text => {
-                    // Parse the text file (one word per line)
-                    const words = text.split('\n')
-                        .map(line => line.trim())
-                        .filter(line => line.length > 0);
-                    
-                    return { topic, words };
-                });
-        });
-        
-        // Process all fetch results
-        return Promise.all(fetchPromises)
-            .then(results => {
-                // Initialize topic words object
-                gameState.topicWords = {
-                    geography: [],
-                    filmtv: [],
-                    disney: []
-                };
-                
-                // Fill with the loaded words
-                results.forEach(result => {
-                    gameState.topicWords[result.topic] = result.words;
-                });
-                
-                // Hide loading overlay
-                document.getElementById('loadingOverlay').style.display = 'none';
-            })
-            .catch(error => {
-                console.error('Error loading word files:', error);
-                alert('Error loading word files. Please try again.');
-                document.getElementById('loadingOverlay').style.display = 'none';
-            });
-    }
 
 
     // Event Listeners - Spy Reveal
@@ -302,113 +229,6 @@ document.addEventListener('DOMContentLoaded', function() {
         showScreen('topicSelection');
     });
     
-    // Helper Functions
-    function initGame() {
-        // Check if we're in development mode
-        const isDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-        
-        if (isDev && fileInputArea) {
-            // Show file input in development mode
-            fileInputArea.style.display = 'block';
-        } else {
-            // In production, load words from server
-            loadWordsFromServer()
-                .then(() => {
-                    showScreen('playerSetup');
-                    hideLoading();
-                })
-                .catch(error => {
-                    console.error('Error loading words from server:', error);
-                    alert('Error loading words. Please refresh the page to try again.');
-                });
-        }
-        
-        // Initialize player fields
-        updatePlayerFields();
-    }
-    
-    function loadWordsFromServer() {
-        return new Promise((resolve, reject) => {
-            // Define file URLs
-            const fileUrls = {
-                geography: './data/geografia.txt',
-                filmtv: './data/filmtv.txt',
-                disney: './data/disney.txt'
-            };
-            
-            // Load all files
-            const promises = Object.entries(fileUrls).map(([topic, url]) => {
-                return fetch(url)
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error(`Failed to load ${url}: ${response.statusText}`);
-                        }
-                        return response.text();
-                    })
-                    .then(text => {
-                        // Parse the text file (one word per line)
-                        gameState.topicWords[topic] = text.split('\n')
-                            .map(line => line.trim())
-                            .filter(line => line.length > 0);
-                    });
-            });
-            
-            // Wait for all files to load
-            Promise.all(promises)
-                .then(() => {
-                    gameState.isLoading = false;
-                    resolve();
-                })
-                .catch(error => {
-                    reject(error);
-                });
-        });
-    }
-    
-    function loadWordsFromFiles() {
-        return new Promise((resolve, reject) => {
-            // Check if files are selected
-            if (!geographyFile.files[0] || !filmtvFile.files[0] || !disneyFile.files[0]) {
-                reject(new Error('Please select all three word files.'));
-                return;
-            }
-            
-            // Read files
-            const fileReaders = [
-                { file: geographyFile.files[0], topic: 'geography' },
-                { file: filmtvFile.files[0], topic: 'filmtv' },
-                { file: disneyFile.files[0], topic: 'disney' }
-            ].map(item => {
-                return new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    
-                    reader.onload = function(e) {
-                        // Parse the text file (one word per line)
-                        gameState.topicWords[item.topic] = e.target.result.split('\n')
-                            .map(line => line.trim())
-                            .filter(line => line.length > 0);
-                        resolve();
-                    };
-                    
-                    reader.onerror = function() {
-                        reject(new Error(`Error reading ${item.file.name}`));
-                    };
-                    
-                    reader.readAsText(item.file);
-                });
-            });
-            
-            // Wait for all files to be read
-            Promise.all(fileReaders)
-                .then(() => {
-                    gameState.isLoading = false;
-                    resolve();
-                })
-                .catch(error => {
-                    reject(error);
-                });
-        });
-    }
     
     function updatePlayerFields() {
         // Clear existing fields
