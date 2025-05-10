@@ -58,31 +58,15 @@ document.addEventListener('DOMContentLoaded', function() {
     const toTopicsBtn = document.getElementById('toTopicsBtn');
     
     // DOM Elements - Topic Selection
-    const topicsContainer = document.getElementById('topicsContainer');
-    const backToPlayersBtn = document.getElementById('backToPlayersBtn');
     const startGameBtn = document.getElementById('startGameBtn');
     
-    // DOM Elements - Spy Reveal
-    const revealPlayerName = document.getElementById('revealPlayerName');
-    const showRoleBtn = document.getElementById('showRoleBtn');
-    const roleInfo = document.getElementById('roleInfo');
-    const revealRole = document.getElementById('revealRole');
-    const secretWordSection = document.getElementById('secretWordSection');
-    const revealSecretWord = document.getElementById('revealSecretWord');
-    const nextPlayerBtn = document.getElementById('nextPlayerBtn');
-    const startTurnBtn = document.getElementById('startTurnBtn');
-    
+
     // DOM Elements - Game Turn
-    const turnInfo = document.getElementById('turnInfo');
     const selectedTopic = document.getElementById('selectedTopic');
     const selectedWord = document.getElementById('selectedWord');
     const newWordBtn = document.getElementById('newWordBtn');
     const endGameBtn = document.getElementById('endGameBtn');
     
-    // File upload elements (for local development)
-    const geographyFile = document.getElementById('geographyFile');
-    const filmtvFile = document.getElementById('filmtvFile');
-    const disneyFile = document.getElementById('disneyFile');
     
     
     // Create background particles
@@ -328,56 +312,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    function startSpyReveal() {
-        gameState.currentPlayerIndex = 0;
-        showSpyReveal();
-    }
-    
-    function showSpyReveal() {
-        // Update player name
-        revealPlayerName.textContent = gameState.players[gameState.currentPlayerIndex];
-        
-        // Reset the role display
-        roleInfo.style.display = 'none';
-        showRoleBtn.style.display = 'block';
-        nextPlayerBtn.style.display = 'none';
-        startTurnBtn.style.display = 'none';
-        
-        // Set up the role information
-        const isSpy = gameState.spyIndices.includes(gameState.currentPlayerIndex);
-        
-        if (isSpy) {
-            revealRole.textContent = "SPIA";
-            revealRole.className = "reveal-role role-spy";
-            secretWordSection.style.display = 'none';
-        } else {
-            revealRole.textContent = "GIOCATORE";
-            revealRole.className = "reveal-role role-player";
-            secretWordSection.style.display = 'block';
-            revealSecretWord.textContent = gameState.currentWord;
-        }
-    }
-    
-    function startGameTurn() {
-        // Update display
-        turnInfo.textContent = `Round ${gameState.currentRound}`;
-        selectedTopic.textContent = gameState.topicNames[gameState.currentTopic];
-        selectedWord.textContent = gameState.currentWord;
-    }
-    
-    function showScreen(screenName) {
-        // Hide all screens
-        Object.values(screens).forEach(screen => {
-            screen.classList.remove('active');
-        });
-        
-        // Show the selected screen
-        screens[screenName].classList.add('active');
-    }
-    
-    function hideLoading() {
-        loadingOverlay.style.display = 'none';
-    }
     
     function createParticles() {
         // Create floating background particles
