@@ -78,6 +78,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const spyRole = document.getElementById('spyRole');
     const wordDisplay = document.getElementById('wordDisplay');
     const topicDisplay = document.getElementById('topicDisplay');
+    const topicDisplaySpy = document.getElementById('topicDisplaySpy');
     const gotItBtn = document.getElementById('gotItBtn');
     
     // DOM Elements - Game Play
@@ -338,6 +339,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (isSpy) {
             // Show spy role
             spyRole.style.display = 'block';
+            topicDisplaySpy.textContent = `Topic: ${gameState.topicNames[gameState.currentTopic]}`;
         } else {
             // Show citizen role with the word
             citizenRole.style.display = 'block';

@@ -122,14 +122,16 @@
             align-items: center;
             margin-bottom: 15px;
             animation: fadeIn 0.3s ease;
+            padding: 0 10px;
         }
 
         .player-label {
-            width: 100px;
+            width: 30px;
             font-weight: bold;
             text-align: right;
             margin-right: 10px;
             font-size: 16px;
+            flex-shrink: 0;
         }
 
         .topic-label {
@@ -345,6 +347,12 @@
         .pulse {
             animation: pulseCount 0.3s ease;
         }
+
+        .finalTopic {
+            font-size: clamp(32px, 10vw, 42px);
+            color: #333;
+            margin-bottom: 15px;
+        }
     </style>
 </head>
 <body>
@@ -407,6 +415,7 @@
             <div class="role-info spy-role" id="spyRole">
                 You are a SPY!
                 <p>Try to figure out what the word is without getting caught!</p>
+                <div id="topicDisplaySpy">Topic: Geography</div>
             </div>
             <button class="game-btn" id="gotItBtn">Got it!</button>
         </div>
@@ -426,7 +435,7 @@
             <h1>Game Over!</h1>
             <h2>The word was:</h2>
             <div class="word-display" id="finalWordDisplay">Word</div>
-            <div id="finalTopicDisplay">Topic: Geography</div>
+            <div class="finalTopic" id="finalTopicDisplay">Topic: Geography</div>
             
             <h2>The spies were:</h2>
             <div class="spy-list" id="spyListDisplay">
