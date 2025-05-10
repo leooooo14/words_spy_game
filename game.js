@@ -88,22 +88,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Create background particles
     createParticles();
     
-    // Event Listeners - File Upload (for local development)
-    if (loadFilesBtn) {
-        loadFilesBtn.addEventListener('click', function() {
-            loadWordsFromFiles()
-                .then(() => {
-                    fileInputArea.style.display = 'none';
-                    showScreen('playerSetup');
-                    hideLoading();
-                })
-                .catch(error => {
-                    console.error('Error loading files:', error);
-                    alert('Error loading word files. Please try again.');
-                });
-        });
-    }
-    
     // Event Listeners - Player Setup
     p_decreaseBtn.addEventListener('click', function() {
         if (gameState.numPlayers > MIN_PLAYERS) {
