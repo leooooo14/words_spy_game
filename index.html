@@ -264,6 +264,24 @@
             color: #d32f2f;
         }
 
+        .spy-list {
+            margin: 15px auto;
+            padding: 12px;
+            background-color: #ffebee;
+            border: 2px solid #d32f2f;
+            border-radius: 10px;
+            text-align: center;
+            font-size: clamp(16px, 4.5vw, 18px);
+            color: #d32f2f;
+            max-width: 90%;
+            display: none;
+            word-wrap: break-word;
+        }
+        
+        .spy-list > div {
+            margin: 8px 0;
+        }
+
         /* Word display */
         .word-display {
             margin: 15px auto;
@@ -293,23 +311,23 @@
             margin-bottom: 15px;
         }
 
-        /* Spy reveal styling */
-        .spy-list {
-            margin: 15px auto;
-            padding: 12px;
-            background-color: #ffebee;
-            border: 2px solid #d32f2f;
-            border-radius: 10px;
-            text-align: center;
-            font-size: clamp(16px, 4.5vw, 18px);
-            color: #d32f2f;
-            max-width: 90%;
+        /* Spy info styling */
+        .other-spies-container {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            font-size: clamp(14px, 4vw, 16px);
             display: none;
-            word-wrap: break-word;
         }
         
-        .spy-list > div {
-            margin: 8px 0;
+        .other-spy-name {
+            display: inline-block;
+            margin: 4px 6px;
+            padding: 4px 8px;
+            background-color: rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+            font-weight: bold;
         }
 
         /* Background particles */
@@ -346,12 +364,6 @@
 
         .pulse {
             animation: pulseCount 0.3s ease;
-        }
-
-        .finalTopic {
-            font-size: clamp(32px, 10vw, 42px);
-            color: #333;
-            margin-bottom: 15px;
         }
     </style>
 </head>
@@ -416,6 +428,7 @@
                 You are a SPY!
                 <p>Try to figure out what the word is without getting caught!</p>
                 <div id="topicDisplaySpy">Topic: Geography</div>
+                <div id="otherSpiesContainer" class="other-spies-container"></div>
             </div>
             <button class="game-btn" id="gotItBtn">Got it!</button>
         </div>
@@ -435,7 +448,7 @@
             <h1>Game Over!</h1>
             <h2>The word was:</h2>
             <div class="word-display" id="finalWordDisplay">Word</div>
-            <div class="finalTopic" id="finalTopicDisplay">Topic: Geography</div>
+            <div id="finalTopicDisplay">Topic: Geography</div>
             
             <h2>The spies were:</h2>
             <div class="spy-list" id="spyListDisplay">

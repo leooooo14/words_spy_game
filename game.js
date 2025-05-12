@@ -79,6 +79,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const wordDisplay = document.getElementById('wordDisplay');
     const topicDisplay = document.getElementById('topicDisplay');
     const topicDisplaySpy = document.getElementById('topicDisplaySpy');
+    const otherSpiesContainer = document.getElementById('otherSpiesContainer');
     const gotItBtn = document.getElementById('gotItBtn');
     
     // DOM Elements - Game Play
@@ -340,6 +341,27 @@ document.addEventListener('DOMContentLoaded', function() {
             // Show spy role
             spyRole.style.display = 'block';
             topicDisplaySpy.textContent = `Topic: ${gameState.topicNames[gameState.currentTopic]}`;
+            
+            // Check if there are multiple spies
+            if (gameState.spyIndices.length > 1) {
+                otherSpiesContainer.style.display = 'block';
+                otherSpiesContainer.innerHTML = '<p>The other spies are:</p>';
+                
+                // Get other spy indices (all spies except current player)
+                const otherSpyIndices = gameState.spyIndices.filter(index => index !== gameState.currentPlayerIndex);
+                
+                // Create elements for each other spy
+                otherSpyIndices.forEach(spyIndex => {
+                    const spyName = gameState.players[spyIndex];
+                    const spyElement = document.createElement('span');
+                    spyElement.className = 'other-spy-name';
+                    spyElement.textContent = spyName;
+                    otherSpiesContainer.appendChild(spyElement);
+                });
+            } else {
+                // If only one spy, hide the container
+                otherSpiesContainer.style.display = 'none';
+            }
         } else {
             // Show citizen role with the word
             citizenRole.style.display = 'block';
@@ -430,7 +452,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     function createParticles() {
         // Create floating background particles
-        const numParticles = 30;
+        // Reduce number on mobile for better performance
+        const isMobile = window.innerWidth < 768;
+        const numParticles = isMobile ? 15 : 30;
         const colors = [
             '#4682b4', '#dc143c', '#32cd32', 
             '#ffa500', '#8a2be2', '#1e90ff'
@@ -441,14 +465,14 @@ document.addEventListener('DOMContentLoaded', function() {
             particle.className = 'particle';
             
             // Random properties
-            const size = 5 + Math.random() * 15;
+            const size = 5 + Math.random() * (isMobile ? 10 : 15);
             const x = Math.random() * window.innerWidth;
             const y = Math.random() * window.innerHeight;
             const color = colors[Math.floor(Math.random() * colors.length)];
             
             // Set translate variables for animation
-            const translateX = -50 + Math.random() * 100;
-            const translateY = -50 + Math.random() * 100;
+            const translateX = -40 + Math.random() * 80;
+            const translateY = -40 + Math.random() * 80;
             
             // Set styles
             particle.style.width = `${size}px`;
@@ -467,5 +491,13 @@ document.addEventListener('DOMContentLoaded', function() {
             // Add to document
             document.body.appendChild(particle);
         }
+        
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            // Remove all existing particles
+            document.querySelectorAll('.particle').forEach(el => el.remove());
+            // Create new particles appropriate for the new size
+            createParticles();
+        });
     }
 });
