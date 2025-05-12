@@ -1,0 +1,79 @@
+montagna
+collina
+pianura
+altopiano
+vulcano
+cratere
+fiume
+ruscello
+lago
+stagno
+palude
+cascata
+ghiacciaio
+valle
+gola
+canyon
+delta
+sorgente
+bacino
+diga
+mare
+oceano
+golfo
+scogliera
+spiaggia
+litorale
+barriera corallina
+porto
+arcipelago
+isola
+penisola
+istmo
+Alpi
+Appennini
+Balcani
+città
+villaggio
+metropoli
+capitale
+confine
+stato
+regione
+provincia
+comune
+equatore
+tropico
+emisfero
+polo
+meridiano di greenwich
+terremoto
+eruzione
+crosta terrestre
+mantello terrestre
+nucleo terrestre
+foresta
+giungla
+savana
+deserto
+prateria
+bosco
+palude
+barriera corallina
+riserva naturale
+periferia
+centro storico
+zona industriale
+zona residenziale
+quartiere
+grattacielo
+autostrada
+ferrovia
+giardino
+villa a schiera
+baraccopoli
+falda acquifera
+laguna
+fonte termale
+diga artificiale
+
