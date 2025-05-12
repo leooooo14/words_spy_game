@@ -16,14 +16,26 @@ document.addEventListener('DOMContentLoaded', function() {
         numSpies: 1,
         spyIndices: [],
         currentPlayerIndex: 0,
-        selectedTopics: ["geografia", "filmtv", "disney"],
+        selectedTopics: ["geography", "filmtv", "disney"],
         topicWords: {
-            geografia: [],
-            filmtv: [],
-            disney: []
+            geography: [
+                "Mount Everest", "Nile River", "Amazon Rainforest", 
+                "Great Barrier Reef", "Grand Canyon", "Sahara Desert", 
+                "Venice", "Great Wall of China", "Machu Picchu", "Eiffel Tower"
+            ],
+            filmtv: [
+                "Star Wars", "Game of Thrones", "Titanic", 
+                "Breaking Bad", "The Matrix", "Stranger Things", 
+                "Jurassic Park", "Harry Potter", "The Simpsons", "Avengers"
+            ],
+            disney: [
+                "Mickey Mouse", "Lion King", "Frozen", 
+                "Finding Nemo", "Toy Story", "Aladdin", 
+                "Beauty and the Beast", "Moana", "The Little Mermaid", "Inside Out"
+            ]
         },
         topicNames: {
-            geografia: "Geografia",
+            geography: "Geografia",
             filmtv: "Film e TV",
             disney: "Disney e Pixar"
         },
@@ -35,8 +47,7 @@ document.addEventListener('DOMContentLoaded', function() {
             seconds: 0,
             interval: null,
             isRunning: false
-        },
-        isLoading: false
+        }
     };
     
     // DOM Elements - Screens
@@ -87,9 +98,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize player fields
     updatePlayerFields();
-    
-    // Load all topic words on page load
-    loadAllTopics();
     
     // Event Listeners - Player Setup
     p_decreaseBtn.addEventListener('click', function() {
@@ -158,38 +166,12 @@ document.addEventListener('DOMContentLoaded', function() {
             gameState.players[index] = input.value || `Player ${index + 1}`;
         });
         
-        // Check if we have words for the selected topics
-        const hasWords = selectedTopics.every(topic => gameState.topicWords[topic] && gameState.topicWords[topic].length > 0);
+        // Prepare the game
+        prepareGame();
         
-        if (!hasWords) {
-            // We need to load words for some topics
-            gameState.isLoading = true;
-            
-            // Show a loading message or spinner if you have one
-            showLoadingMessage();
-            
-            // Load words for selected topics
-            loadSelectedTopics(selectedTopics)
-                .then(() => {
-                    // Hide loading message
-                    hideLoadingMessage();
-                    
-                    // Prepare and start the game
-                    prepareGame();
-                    gameState.currentPlayerIndex = 0;
-                    startPlayerPass();
-                })
-                .catch(error => {
-                    console.error('Error loading topic words:', error);
-                    alert('Error loading topic words. Please try again.');
-                    hideLoadingMessage();
-                });
-        } else {
-            // We already have the words for the selected topics
-            prepareGame();
-            gameState.currentPlayerIndex = 0;
-            startPlayerPass();
-        }
+        // Start with the player pass screen
+        gameState.currentPlayerIndex = 0;
+        startPlayerPass();
     });
     
     // Event Listeners - Player Pass
@@ -286,56 +268,6 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Show the requested screen
         screens[screenName].classList.add('active');
-    }
-    
-    // Function to load all topic words from text files
-    function loadAllTopics() {
-        const topics = Object.keys(gameState.topicWords);
-        return Promise.all(topics.map(topic => loadTopicWords(topic)));
-    }
-    
-    // Function to load only selected topic words
-    function loadSelectedTopics(selectedTopics) {
-        return Promise.all(selectedTopics.map(topic => loadTopicWords(topic)));
-    }
-    
-    // Function to load words for a specific topic
-    function loadTopicWords(topic) {
-        // If we already have words for this topic, don't reload
-        if (gameState.topicWords[topic] && gameState.topicWords[topic].length > 0) {
-            return Promise.resolve();
-        }
-        
-        return fetch(`./data/${topic}.txt`)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`Failed to load ${topic}.txt`);
-                }
-                return response.text();
-            })
-            .then(text => {
-                // Split the text by newlines and filter out empty lines
-                const words = text.split('\n')
-                    .map(line => line.trim())
-                    .filter(line => line !== '');
-                
-                // Store the words
-                gameState.topicWords[topic] = words;
-            });
-    }
-    
-    function showLoadingMessage() {
-        // You could add a loading overlay element to your HTML and show it here
-        // For now, just update the start button
-        startGameBtn.textContent = 'Loading...';
-        startGameBtn.disabled = true;
-    }
-    
-    function hideLoadingMessage() {
-        // Hide loading overlay
-        startGameBtn.textContent = 'Start Game!';
-        startGameBtn.disabled = false;
-        gameState.isLoading = false;
     }
     
     function prepareGame() {
