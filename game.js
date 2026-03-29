@@ -974,12 +974,10 @@ document.addEventListener('DOMContentLoaded', function() {
             document.body.appendChild(particle);
         }
         
-        // Handle window resize
-        window.addEventListener('resize', function() {
-            // Remove all existing particles
-            document.querySelectorAll('.particle').forEach(el => el.remove());
-            // Create new particles appropriate for the new size
-            createParticles();
-        });
     }
+
+    window.addEventListener('resize', function() {
+        document.querySelectorAll('.particle').forEach(el => el.remove());
+        createParticles();
+    });
 });
