@@ -79,8 +79,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 "deserto",
                 "prateria",
                 "bosco",
-                "palude",
-                "barriera corallina",
                 "riserva naturale",
                 "periferia",
                 "centro storico",
@@ -289,8 +287,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 "Psycho",
                 "Arancia meccanica",
                 "Taxi Driver",
-                "2001: Odissea nello spazio",
-                "Blade Runner",
                 "Shining",
                 "Quarto potere",
                 "Il grande Lebowski",
@@ -299,7 +295,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 "American Psycho",
                 "Il buono, il brutto, il cattivo",
                 "Il mago di Oz",
-                "Schindler's List",
                 "Via col vento",
                 "Memento",
                 "Full Metal Jacket",
@@ -320,7 +315,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 "La vita è bella",
                 "Il pianista",
                 "Requiem for a Dream",
-                "The Wolf of Wall Street",
                 "Rocky",
                 "Oppenheimer"
             ],
@@ -378,8 +372,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 "Luca",
                 "Red",
                 "Lightyear - La vera storia di Buzz",
-                "Elemental",                
-                "Cenerentola"
+                "Elemental"
             ],
 
             specific_places: [
@@ -433,7 +426,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 "Museo del Louvre",
                 "La Casa Bianca",
                 "Area 51",
-                "Times Square",
                 "Città del Vaticano",
                 "London Eye",
                 "Antelope Canyon",
@@ -451,11 +443,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 "Monumento a Lincoln",
                 "Costiera Amalfitana",
                 "Le Cinque Terre",
-                "Stonehenge",
                 "Palazzo Ducale",
                 "Campidoglio degli Stati Uniti",
                 "Il Cremlino",
-                "Cattedrale di Notre-Dame",
                 "Alcatraz",
                 "Tempio del Cielo",
                 "Mount Fuji",
