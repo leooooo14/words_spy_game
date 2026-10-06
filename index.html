@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Spy Game</title>
+    <title>Impostor Game</title>
     <style>
         /* Base styles */
         body {
@@ -68,7 +68,7 @@
             align-items: center;
             margin-bottom: 30px;
         }
-        .spies-count-container {
+        .impostors-count-container {
             display: flex;
             justify-content: center;
             align-items: center;
@@ -192,7 +192,9 @@
         /* Button styling */
         .game-btn {
             display: block;
-            width: min(140px, 80%);
+            width: auto;
+            min-width: min(140px, 80%);
+            max-width: 90%;
             height: 44px;
             background-color: #e0e0e0;
             border: 2px solid #333;
@@ -203,7 +205,7 @@
             margin: 0 auto;
             margin-bottom: 15px;
             transition: all 0.2s ease;
-            padding: 0 10px;
+            padding: 0 16px;
             overflow: hidden;
             white-space: nowrap;
             text-overflow: ellipsis;
@@ -252,19 +254,53 @@
             word-wrap: break-word;
         }
 
+        .clown-role {
+            background-color: #f3e5f5;
+            border: 2px solid #7b1fa2;
+            color: #7b1fa2;
+        }
+
+        .clown-reveal-section {
+            display: none;
+        }
+
+        .clown-list {
+            margin: 15px auto;
+            padding: 12px;
+            background-color: #f3e5f5;
+            border: 2px solid #7b1fa2;
+            border-radius: 10px;
+            text-align: center;
+            font-size: clamp(16px, 4.5vw, 18px);
+            color: #7b1fa2;
+            max-width: 90%;
+            word-wrap: break-word;
+        }
+
+        .first-player {
+            text-align: center;
+            font-size: clamp(16px, 4.5vw, 18px);
+            margin-bottom: 10px;
+        }
+
+        .first-player span {
+            font-weight: bold;
+            color: #3f51b5;
+        }
+
         .citizen-role {
             background-color: #e8f5e9;
             border: 2px solid #388e3c;
             color: #388e3c;
         }
 
-        .spy-role {
+        .impostor-role {
             background-color: #ffebee;
             border: 2px solid #d32f2f;
             color: #d32f2f;
         }
 
-        .spy-list {
+        .impostor-list {
             margin: 15px auto;
             padding: 12px;
             background-color: #ffebee;
@@ -278,7 +314,7 @@
             word-wrap: break-word;
         }
         
-        .spy-list > div {
+        .impostor-list > div {
             margin: 8px 0;
         }
 
@@ -311,8 +347,8 @@
             margin-bottom: 15px;
         }
 
-        /* Spy info styling */
-        .other-spies-container {
+        /* Impostor info styling */
+        .other-impostors-container {
             margin-top: 15px;
             padding: 10px;
             background-color: rgba(255, 255, 255, 0.2);
@@ -321,7 +357,7 @@
             display: none;
         }
         
-        .other-spy-name {
+        .other-impostor-name {
             display: inline-block;
             margin: 4px 6px;
             padding: 4px 8px;
@@ -331,8 +367,12 @@
         }
 
         /* Hint mode toggle switch */
+        .game-options {
+            margin-bottom: 25px;
+        }
+
         .mode-toggle {
-            margin: 0 10px 25px;
+            margin: 0 10px 12px;
             padding: 12px 14px;
             border: 2px solid #e0e0e0;
             border-radius: 10px;
@@ -413,16 +453,12 @@
             outline-offset: 2px;
         }
 
-        .hint-mode-note {
+        .topic-item.unavailable {
             display: none;
-            margin: 0 10px 20px;
-            text-align: center;
-            font-size: 15px;
-            color: #555;
         }
 
-        /* Spy hint display */
-        .spy-hint-container {
+        /* Impostor hint display */
+        .impostor-hint-container {
             display: none;
             margin-top: 15px;
             font-size: clamp(14px, 4vw, 16px);
@@ -501,38 +537,62 @@
                 <!-- Player fields will be added here by JavaScript -->
             </div>
             
-            <h1>Select Number of Spies</h1>
-            <div class="spies-count-container">
-                <button class="count-btn" id="s_decreaseBtn">-</button>
-                <div class="count" id="spiesCount">1</div>
-                <button class="count-btn" id="s_increaseBtn">+</button>
+            <h1>Select Number of Impostors</h1>
+            <div class="impostors-count-container">
+                <button class="count-btn" id="i_decreaseBtn">-</button>
+                <div class="count" id="impostorsCount">1</div>
+                <button class="count-btn" id="i_increaseBtn">+</button>
             </div>
             
+            <h1>Game options</h1>
+            <div class="game-options">
             <div class="mode-toggle" id="hintModeBox">
                 <label class="switch-row" for="hintModeToggle">
                     <span class="switch-text">
-                        <span class="switch-title">Spy hint mode</span>
-                        <span class="switch-desc">The spy gets a hint word related to the secret one</span>
+                        <span class="switch-title">Impostor hint mode</span>
+                        <span class="switch-desc">The impostor gets a hint word related to the secret one</span>
                     </span>
                     <input type="checkbox" id="hintModeToggle" class="switch-input">
                     <span class="switch-slider"></span>
                 </label>
             </div>
 
-            <div class="hint-mode-note" id="hintModeNote">
-                In hint mode the word is picked from <b>Oggetti comuni</b>.
+            <div class="mode-toggle">
+                <label class="switch-row" for="impostorFirstToggle">
+                    <span class="switch-text">
+                        <span class="switch-title">Impostor can be first</span>
+                        <span class="switch-desc">If off, the first player to speak is never an impostor</span>
+                    </span>
+                    <input type="checkbox" id="impostorFirstToggle" class="switch-input" checked>
+                    <span class="switch-slider"></span>
+                </label>
             </div>
 
-            <div id="topicsSection">
+            <div class="mode-toggle">
+                <label class="switch-row" for="clownToggle">
+                    <span class="switch-text">
+                        <span class="switch-title">Add a clown</span>
+                        <span class="switch-desc">A player who knows the word but wins if they get voted out</span>
+                    </span>
+                    <input type="checkbox" id="clownToggle" class="switch-input">
+                    <span class="switch-slider"></span>
+                </label>
+            </div>
+            </div>
+
             <h1>Select the word topics</h1>
             <div class="topics-container" id="topicsContainer">
+                <div class="topic-item">
+                    <input type="checkbox" id="topic-oggetti_comuni" class="topic-checkbox" value="oggetti_comuni">
+                    <label for="topic-oggetti_comuni" class="topic-label">Oggetti comuni</label>
+                </div>
                 <div class="topic-item">
                     <input type="checkbox" id="topic-geography" class="topic-checkbox" value="generic_geography">
                     <label for="topic-geography" class="topic-label">Elementi geografici generici</label>
                 </div>
                 <div class="topic-item">
                     <input type="checkbox" id="topic-specific_places" class="topic-checkbox" value="specific_places">
-                    <label for="topic-specific_places" class="topic-label">Luoghi Specifici</label>
+                    <label for="topic-specific_places" class="topic-label">Luoghi famosi</label>
                 </div>
                 <div class="topic-item">
                     <input type="checkbox" id="topic-filmtv" class="topic-checkbox" value="filmtv">
@@ -547,7 +607,6 @@
                     <label for="topic-professions" class="topic-label">Professioni</label>
                 </div> 
                 
-            </div>
             </div>
             
             <button class="game-btn" id="startGameBtn">Start Game!</button>
@@ -568,15 +627,22 @@
                 <div class="word-display" id="wordDisplay">Word</div>
                 <div id="topicDisplay">Topic: Geography</div>
             </div>
-            <div class="role-info spy-role" id="spyRole">
-                You are a SPY!
+            <div class="role-info impostor-role" id="impostorRole">
+                You are an IMPOSTOR!
                 <p>Try to figure out what the word is without getting caught!</p>
-                <div id="topicDisplaySpy">Topic: Geography</div>
-                <div id="spyHintContainer" class="spy-hint-container">
+                <div id="topicDisplayImpostor">Topic: Geography</div>
+                <div id="impostorHintContainer" class="impostor-hint-container">
                     Your hint:
-                    <div class="hint-display" id="spyHintDisplay">Hint</div>
+                    <div class="hint-display" id="impostorHintDisplay">Hint</div>
                 </div>
-                <div id="otherSpiesContainer" class="other-spies-container"></div>
+                <div id="otherImpostorsContainer" class="other-impostors-container"></div>
+            </div>
+            <div class="role-info clown-role" id="clownRole">
+                You are the CLOWN! 🤡
+                <p>You know the word, but you win only if the others vote for you!</p>
+                The word is:
+                <div class="word-display" id="clownWordDisplay">Word</div>
+                <div id="topicDisplayClown">Topic: Geography</div>
             </div>
             <button class="game-btn" id="gotItBtn">Got it!</button>
         </div>
@@ -584,11 +650,12 @@
         <!-- Game Play Screen -->
         <div class="screen" id="gamePlayScreen">
             <h1>Game in Progress</h1>
+            <div class="first-player">First to speak: <span id="firstPlayerName">Player 1</span></div>
             <div class="timer-container">
                 <div class="timer-display" id="timerDisplay">10:00</div>
                 <button class="game-btn" id="timerBtn">Start Timer</button>
             </div>
-            <button class="game-btn red-btn" id="revealSpiesBtn">Reveal Spies</button>
+            <button class="game-btn red-btn" id="revealImpostorsBtn">Reveal Impostors</button>
         </div>
 
         <!-- Game End Screen -->
@@ -599,9 +666,14 @@
             <div id="finalTopicDisplay">Topic: Geography</div>
             <div class="final-hint" id="finalHintDisplay"></div>
             
-            <h2>The spies were:</h2>
-            <div class="spy-list" id="spyListDisplay">
-                <!-- Spy list will be added here by JavaScript -->
+            <h2>The impostors were:</h2>
+            <div class="impostor-list" id="impostorListDisplay">
+                <!-- Impostor list will be added here by JavaScript -->
+            </div>
+
+            <div class="clown-reveal-section" id="clownRevealSection">
+                <h2>The clown was:</h2>
+                <div class="clown-list" id="clownRevealName"></div>
             </div>
             
             <button class="game-btn" id="newGameBtn">New Game</button>

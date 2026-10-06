@@ -2,171 +2,541 @@ document.addEventListener('DOMContentLoaded', function() {
     // Game configuration
     const MIN_PLAYERS = 3;
     const MAX_PLAYERS = 15;
-    const MIN_SPIES = 1;
+    const MIN_IMPOSTORS = 1;
     const DEFAULT_PLAYER_NAMES = [
         "Player 1", "Player 2", "Player 3", "Player 4", "Player 5", 
         "Player 6", "Player 7", "Player 8", "Player 9", "Player 10",
         "Player 11", "Player 12", "Player 13", "Player 14", "Player 15"
     ];
     
-    // Hint mode: the word is picked from this list and the spy gets the paired hint.
-    // Format: [word, hint]. Hints don't need to be unique.
-    const HINT_TOPIC = "oggetti_comuni";
-    const HINT_WORD_PAIRS = [
-        ["palla", "rotondo"],
-        ["sedia", "casa"],
-        ["compasso", "studio"],
-        ["scuola", "mattina"],
-        ["capra", "animale"],
-        ["cappuccino", "colazione"],
-        ["vaso", "fragile"],
-        ["prosciutto", "salato"],
-        ["cappello", "testa"],
-        ["peperoncino", "caldo"],
-        ["sole", "caldo"],
-        ["ombrello", "autunno"],
-        ["forchetta", "tavola"],
-        ["cuscino", "morbido"],
-        ["specchio", "bagno"],
-        ["orologio", "metallo"],
-        ["chiave", "tasca"],
-        ["candela", "luce"],
-        ["spazzolino", "bagno"],
-        ["frigorifero", "cucina"],
-        ["pizza", "cena"],
-        ["gelato", "dolce"],
-        ["bicicletta", "parco"],
-        ["libro", "carta"],
-        ["matita", "legno"],
-        ["telefono", "tasca"],
-        ["lampadina", "luce"],
-        ["zaino", "viaggio"],
-        ["scarpa", "pelle"],
-        ["occhiali", "faccia"],
-        ["coltello", "cucina"],
-        ["pentola", "metallo"],
-        ["tazza", "ceramica"],
-        ["finestra", "casa"],
-        ["porta", "legno"],
-        ["letto", "notte"],
-        ["divano", "morbido"],
-        ["televisione", "salotto"],
-        ["chitarra", "musica"],
-        ["pianoforte", "pesante"],
-        ["banana", "giallo"],
-        ["mela", "rosso"],
-        ["limone", "giallo"],
-        ["arancia", "succo"],
-        ["uovo", "colazione"],
-        ["latte", "bianco"],
-        ["formaggio", "giallo"],
-        ["pane", "forno"],
-        ["caffè", "amaro"],
-        ["vino", "festa"],
-        ["birra", "bar"],
-        ["cioccolato", "dolce"],
-        ["miele", "colazione"],
-        ["pasta", "pranzo"],
-        ["spaghetti", "cena"],
-        ["cane", "parco"],
-        ["gatto", "pelo"],
-        ["pesce", "mare"],
-        ["cavallo", "veloce"],
-        ["mucca", "fattoria"],
-        ["pecora", "bianco"],
-        ["gallina", "mattina"],
-        ["elefante", "grigio"],
-        ["leone", "pericoloso"],
-        ["ape", "estate"],
-        ["ragno", "paura"],
-        ["serpente", "paura"],
-        ["treno", "viaggio"],
-        ["aereo", "cielo"],
-        ["nave", "viaggio"],
-        ["automobile", "strada"],
-        ["semaforo", "colori"],
-        ["ospedale", "edificio"],
-        ["spiaggia", "estate"],
-        ["neve", "freddo"],
-        ["pioggia", "grigio"],
-        ["luna", "cielo"],
-        ["stella", "notte"],
-        ["albero", "verde"],
-        ["fiore", "primavera"],
-        ["erba", "verde"],
-        ["montagna", "alto"],
-        ["fuoco", "caldo"],
-        ["ghiaccio", "freddo"],
-        ["computer", "lavoro"],
-        ["lavatrice", "casa"],
-        ["aspirapolvere", "rumore"],
-        ["forbici", "ufficio"],
-        ["colla", "bambini"],
-        ["martello", "rumore"],
-        ["cacciavite", "garage"],
-        ["scala", "alto"],
-        ["torta", "festa"],
-        ["regalo", "sorpresa"],
-        ["palloncino", "bambini"],
-        ["maschera", "faccia"],
-        ["calzino", "coppia"],
-        ["guanto", "inverno"],
-        ["sciarpa", "inverno"],
-        ["cintura", "pelle"],
-        ["borsa", "negozio"],
-        ["portafoglio", "tasca"],
-        ["moneta", "rotondo"],
-        ["dado", "gioco"],
-        ["carte da gioco", "gioco"],
-        ["scacchi", "pensare"],
-        ["medaglia", "sport"],
-        ["corona", "oro"],
-        ["spada", "storia"],
-        ["castello", "antico"],
-        ["faro", "mare"],
-        ["tenda", "vacanza"],
-        ["sapone", "pulito"],
-        ["asciugamano", "bagno"],
-        ["doccia", "acqua"],
-        ["dentifricio", "pulito"],
-        ["profumo", "regalo"],
-        ["rossetto", "rosso"],
-        ["pettine", "mattina"],
-        ["anello", "oro"],
-        ["termometro", "medico"],
-        ["cerotto", "pelle"],
-        ["siringa", "paura"],
-        ["bandiera", "colori"],
-        ["mappa", "viaggio"],
-        ["bussola", "avventura"],
-        ["microfono", "musica"],
-        ["fotografia", "vacanza"],
-        ["cartolina", "carta"],
-        ["busta", "carta"],
-        ["calendario", "muro"],
-        ["sveglia", "mattina"],
-        ["tappo", "piccolo"],
-        ["bottiglia", "vetro"],
-        ["cannuccia", "plastica"],
-        ["popcorn", "salato"],
-        ["biglietto", "viaggio"],
-        ["zucca", "autunno"],
-        ["albero di Natale", "inverno"],
-        ["pupazzo di neve", "bianco"],
-        ["carota", "orto"],
-        ["patata", "terra"],
-        ["pomodoro", "orto"],
-        ["cipolla", "cucina"],
-        ["aglio", "odore"],
-        ["fungo", "autunno"]
-    ];
+    // Hint mode: for each topic, the hint shown to the impostors for every word.
+    // Only topics listed here can be played in hint mode. Hints don't need to be unique
+    // and should stay vague (a trait, a setting, a theme), not a giveaway.
+    // In hint mode, these topics are merged into a broader one:
+    // their checkbox is hidden and their words are played under the target topic.
+    const HINT_MODE_MERGED_TOPICS = {
+        disney: "filmtv"
+    };
+
+    const HINTS = {
+        oggetti_comuni: {
+            "palla": "rotondo",
+            "sedia": "casa",
+            "compasso": "studio",
+            "scuola": "mattina",
+            "capra": "animale",
+            "cappuccino": "colazione",
+            "vaso": "fragile",
+            "prosciutto": "salato",
+            "cappello": "testa",
+            "peperoncino": "caldo",
+            "sole": "caldo",
+            "ombrello": "autunno",
+            "forchetta": "tavola",
+            "cuscino": "morbido",
+            "specchio": "bagno",
+            "orologio": "metallo",
+            "chiave": "tasca",
+            "candela": "luce",
+            "spazzolino": "bagno",
+            "frigorifero": "cucina",
+            "pizza": "cena",
+            "gelato": "dolce",
+            "bicicletta": "parco",
+            "libro": "carta",
+            "matita": "legno",
+            "telefono": "tasca",
+            "lampadina": "luce",
+            "zaino": "viaggio",
+            "scarpa": "pelle",
+            "occhiali": "faccia",
+            "coltello": "cucina",
+            "pentola": "metallo",
+            "tazza": "ceramica",
+            "finestra": "casa",
+            "porta": "legno",
+            "letto": "notte",
+            "divano": "morbido",
+            "televisione": "salotto",
+            "chitarra": "musica",
+            "pianoforte": "pesante",
+            "banana": "giallo",
+            "mela": "rosso",
+            "limone": "giallo",
+            "arancia": "succo",
+            "uovo": "colazione",
+            "latte": "bianco",
+            "formaggio": "giallo",
+            "pane": "forno",
+            "caffè": "amaro",
+            "vino": "festa",
+            "birra": "bar",
+            "cioccolato": "dolce",
+            "miele": "colazione",
+            "pasta": "pranzo",
+            "spaghetti": "cena",
+            "cane": "parco",
+            "gatto": "pelo",
+            "pesce": "mare",
+            "cavallo": "veloce",
+            "mucca": "fattoria",
+            "pecora": "bianco",
+            "gallina": "mattina",
+            "elefante": "grigio",
+            "leone": "pericoloso",
+            "ape": "estate",
+            "ragno": "paura",
+            "serpente": "paura",
+            "treno": "viaggio",
+            "aereo": "cielo",
+            "nave": "viaggio",
+            "automobile": "strada",
+            "semaforo": "colori",
+            "ospedale": "edificio",
+            "spiaggia": "estate",
+            "neve": "freddo",
+            "pioggia": "grigio",
+            "luna": "cielo",
+            "stella": "notte",
+            "albero": "verde",
+            "fiore": "primavera",
+            "erba": "verde",
+            "montagna": "alto",
+            "fuoco": "caldo",
+            "ghiaccio": "freddo",
+            "computer": "lavoro",
+            "lavatrice": "casa",
+            "aspirapolvere": "rumore",
+            "forbici": "ufficio",
+            "colla": "bambini",
+            "martello": "rumore",
+            "cacciavite": "garage",
+            "scala": "alto",
+            "torta": "festa",
+            "regalo": "sorpresa",
+            "palloncino": "bambini",
+            "maschera": "faccia",
+            "calzino": "coppia",
+            "guanto": "inverno",
+            "sciarpa": "inverno",
+            "cintura": "pelle",
+            "borsa": "negozio",
+            "portafoglio": "tasca",
+            "moneta": "rotondo",
+            "dado": "gioco",
+            "carte da gioco": "gioco",
+            "scacchi": "pensare",
+            "medaglia": "sport",
+            "corona": "oro",
+            "spada": "storia",
+            "castello": "antico",
+            "faro": "mare",
+            "tenda": "vacanza",
+            "sapone": "pulito",
+            "asciugamano": "bagno",
+            "doccia": "acqua",
+            "dentifricio": "pulito",
+            "profumo": "regalo",
+            "rossetto": "rosso",
+            "pettine": "mattina",
+            "anello": "oro",
+            "termometro": "medico",
+            "cerotto": "pelle",
+            "siringa": "paura",
+            "bandiera": "colori",
+            "mappa": "viaggio",
+            "bussola": "avventura",
+            "microfono": "musica",
+            "fotografia": "vacanza",
+            "cartolina": "carta",
+            "busta": "carta",
+            "calendario": "muro",
+            "sveglia": "mattina",
+            "tappo": "piccolo",
+            "bottiglia": "vetro",
+            "cannuccia": "plastica",
+            "popcorn": "salato",
+            "biglietto": "viaggio",
+            "zucca": "autunno",
+            "albero di Natale": "inverno",
+            "pupazzo di neve": "bianco",
+            "carota": "orto",
+            "patata": "terra",
+            "pomodoro": "orto",
+            "cipolla": "cucina",
+            "aglio": "odore",
+            "fungo": "autunno"
+        },
+
+        filmtv: {
+            "Il trono di Spade": "regno",
+            "Il signore degli anelli": "viaggio",
+            "Breaking Bad": "droga",
+            "La casa di carta": "soldi",
+            "Stranger Things": "anni '80",
+            "Friends": "amicizia",
+            "The Office": "lavoro",
+            "Squid Game": "soldi",
+            "The Mandalorian": "spazio",
+            "The Witcher": "mostri",
+            "Titanic": "amore",
+            "Avatar": "natura",
+            "Il padrino": "famiglia",
+            "Pulp Fiction": "crimine",
+            "Inception": "sogno",
+            "Interstellar": "spazio",
+            "Forrest Gump": "America",
+            "Matrix": "tecnologia",
+            "The Crown": "regno",
+            "Peaky Blinders": "Inghilterra",
+            "Vikings": "guerra",
+            "Narcos": "droga",
+            "La regina degli scacchi": "talento",
+            "Dark": "tempo",
+            "Black Mirror": "tecnologia",
+            "The Walking Dead": "sopravvivenza",
+            "Lost": "mistero",
+            "The Big Bang Theory": "scienza",
+            "Modern Family": "famiglia",
+            "Grey's Anatomy": "ospedale",
+            "Doctor Who": "tempo",
+            "The Last of Us": "sopravvivenza",
+            "Better Call Saul": "tribunale",
+            "The Boys": "supereroi",
+            "True Detective": "indagine",
+            "Westworld": "robot",
+            "Chernobyl": "disastro",
+            "Loki": "supereroi",
+            "Bridgerton": "nobiltà",
+            "Succession": "potere",
+            "Euphoria": "adolescenti",
+            "Il Gladiatore": "vendetta",
+            "Salvate il soldato Ryan": "guerra",
+            "Schindler's List": "guerra",
+            "Il cavaliere oscuro": "città",
+            "The Social Network": "tecnologia",
+            "Fight Club": "follia",
+            "Kill Bill": "vendetta",
+            "Quei bravi ragazzi": "mafia",
+            "Ritorno al futuro": "tempo",
+            "Jurassic Park": "scienza",
+            "Star Wars": "spazio",
+            "E.T. l'extra-terrestre": "alieni",
+            "Indiana Jones": "avventura",
+            "Harry Potter": "magia",
+            "Il silenzio degli innocenti": "indagine",
+            "Joker": "follia",
+            "Parasite": "famiglia",
+            "La La Land": "musica",
+            "The Bear": "cucina",
+            "Ted Lasso": "sport",
+            "Mindhunter": "indagine",
+            "Sex Education": "scuola",
+            "The End of the F***ing World": "adolescenti",
+            "Lupin": "furto",
+            "Elite": "scuola",
+            "Baby Driver": "musica",
+            "The Gentlemen": "Inghilterra",
+            "The Wolf of Wall Street": "soldi",
+            "Django Unchained": "far west",
+            "Bastardi senza gloria": "guerra",
+            "Una notte da leoni": "festa",
+            "American Pie": "risate",
+            "Pretty Woman": "amore",
+            "Notting Hill": "Inghilterra",
+            "Il diavolo veste Prada": "moda",
+            "Le pagine della nostra vita": "amore",
+            "Bohemian Rhapsody": "musica",
+            "A Star Is Born": "fama",
+            "Top Gun": "cielo",
+            "Mission: Impossible": "spie",
+            "Fast & Furious": "velocità",
+            "John Wick": "vendetta",
+            "James Bond": "spie",
+            "I pirati dei Caraibi": "mare",
+            "The Avengers": "squadra",
+            "Spider-Man": "supereroi",
+            "Batman": "notte",
+            "Superman": "volare",
+            "Wonder Woman": "supereroi",
+            "Captain America": "America",
+            "Iron Man": "tecnologia",
+            "Thor": "supereroi",
+            "Hulk": "rabbia",
+            "Black Panther": "regno",
+            "Doctor Strange": "magia",
+            "Guardiani della Galassia": "spazio",
+            "Deadpool": "risate",
+            "X-Men": "supereroi",
+            "Dune": "deserto",
+            "Blade Runner": "futuro",
+            "2001: Odissea nello spazio": "spazio",
+            "The Truman Show": "finzione",
+            "V per Vendetta": "ribellione",
+            "The Prestige": "rivalità",
+            "The Departed": "polizia",
+            "Zodiac": "indagine",
+            "Il curioso caso di Benjamin Button": "tempo",
+            "The Revenant": "freddo",
+            "Gomorra": "crimine",
+            "Boris": "televisione",
+            "Don Matteo": "Italia",
+            "Mare fuori": "prigione",
+            "Il commissario Montalbano": "polizia",
+            "Strappare lungo i bordi": "animazione",
+            "Tutto chiede salvezza": "ospedale",
+            "Il cacciatore": "armi",
+            "House of the Dragon": "regno",
+            "The Umbrella Academy": "famiglia",
+            "Lucifer": "religione",
+            "You": "ossessione",
+            "The Haunting of Hill House": "paura",
+            "American Horror Story": "paura",
+            "Penny Dreadful": "mostri",
+            "Hannibal": "assassino",
+            "Dexter": "sangue",
+            "The X-Files": "alieni",
+            "Sherlock": "indagine",
+            "I Soprano": "mafia",
+            "Suits": "tribunale",
+            "The Good Wife": "tribunale",
+            "Criminal Minds": "indagine",
+            "CSI": "polizia",
+            "Prison Break": "prigione",
+            "Orange Is the New Black": "prigione",
+            "Cobra Kai": "sport",
+            "Emily in Paris": "moda",
+            "Brooklyn Nine-Nine": "polizia",
+            "Scrubs": "ospedale",
+            "How I Met Your Mother": "amicizia",
+            "I Griffin": "famiglia",
+            "I Simpson": "giallo",
+            "South Park": "ragazzi",
+            "Rick e Morty": "scienza",
+            "BoJack Horseman": "fama",
+            "Love, Death & Robots": "robot",
+            "Arcane": "videogioco",
+            "Attack on Titan": "sopravvivenza",
+            "Death Note": "morte",
+            "One Piece": "tesoro",
+            "Dragon Ball": "combattimento",
+            "Demon Slayer": "Giappone",
+            "Jujutsu Kaisen": "Giappone",
+            "Fullmetal Alchemist": "fratelli",
+            "Cowboy Bebop": "spazio",
+            "The Sandman": "sogno",
+            "Wednesday": "scuola",
+            "Dahmer": "assassino",
+            "Inventing Anna": "inganno",
+            "The Chair": "lavoro",
+            "All of Us Are Dead": "zombie",
+            "Reservation Dogs": "ragazzi",
+            "Yellowstone": "America",
+            "The Rings of Power": "magia",
+            "Andor": "ribellione",
+            "Obi-Wan Kenobi": "spazio",
+            "Moon Knight": "supereroi",
+            "Ms. Marvel": "ragazzi",
+            "Station Eleven": "sopravvivenza",
+            "Pachinko": "famiglia",
+            "Scissione": "lavoro",
+            "Midnight Mass": "religione",
+            "Il problema dei tre corpi": "scienza",
+            "Shogun": "Giappone",
+            "Fallout": "videogioco",
+            "The Morning Show": "televisione",
+            "For All Mankind": "spazio",
+            "L'amore e la vita": "ospedale",
+            "L'alienista": "indagine",
+            "Il nome della rosa": "mistero",
+            "Il processo": "tribunale",
+            "Il Re": "potere",
+            "Noi (Us)": "paura",
+            "Psycho": "paura",
+            "Arancia meccanica": "violenza",
+            "Taxi Driver": "notte",
+            "Shining": "hotel",
+            "Quarto potere": "giornali",
+            "Il grande Lebowski": "risate",
+            "Apocalypse Now": "guerra",
+            "Scarface": "droga",
+            "American Psycho": "assassino",
+            "Il buono, il brutto, il cattivo": "far west",
+            "Il mago di Oz": "viaggio",
+            "Via col vento": "amore",
+            "Memento": "memoria",
+            "Full Metal Jacket": "guerra",
+            "Reservoir Dogs - Le iene": "crimine",
+            "Alien": "spazio",
+            "Mary Poppins": "magia",
+            "Il settimo sigillo": "morte",
+            "C'era una volta in America": "mafia",
+            "Vertigo - La donna che visse due volte": "ossessione",
+            "Frankenstein": "mostri",
+            "Toro scatenato": "sport",
+            "L'esorcista": "religione",
+            "Non aprite quella porta": "paura",
+            "8½": "cinema",
+            "Seven": "assassino",
+            "Whiplash": "musica",
+            "La grande bellezza": "Italia",
+            "La vita è bella": "guerra",
+            "Il pianista": "guerra",
+            "Requiem for a Dream": "droga",
+            "Rocky": "sport",
+            "Oppenheimer": "scienza"
+        },
+
+        disney: {
+            "Biancaneve e i sette nani": "principessa",
+            "Pinocchio": "legno",
+            "Dumbo": "circo",
+            "Bambi": "bosco",
+            "I tre moschettieri": "amicizia",
+            "Cenerentola": "principessa",
+            "Alice nel Paese delle Meraviglie": "sogno",
+            "Le avventure di Peter Pan": "volare",
+            "La bella addormentata nel bosco": "principessa",
+            "La carica dei 101": "animali",
+            "La spada nella roccia": "magia",
+            "Il libro della giungla": "giungla",
+            "Gli Aristogatti": "Parigi",
+            "Robin Hood": "animali",
+            "Le avventure di Winnie the Pooh": "amicizia",
+            "La sirenetta": "mare",
+            "La bella e la bestia": "castello",
+            "Aladdin": "deserto",
+            "Il re leone": "famiglia",
+            "Pocahontas": "natura",
+            "Il gobbo di Notre Dame": "Parigi",
+            "Hercules": "eroe",
+            "Mulan": "guerra",
+            "Tarzan": "giungla",
+            "Atlantis - L'impero perduto": "avventura",
+            "Lilo & Stitch": "alieni",
+            "Il pianeta del tesoro": "spazio",
+            "I Robinson - Una famiglia spaziale": "futuro",
+            "La principessa e il ranocchio": "musica",
+            "Rapunzel - L'intreccio della torre": "principessa",
+            "Ralph Spaccatutto": "videogioco",
+            "Frozen - Il regno di ghiaccio": "inverno",
+            "Big Hero 6": "robot",
+            "Zootropolis": "città",
+            "Raya e l'ultimo drago": "magia",
+            "Toy Story": "amicizia",
+            "A Bug's Life - Megaminimondo": "piccolo",
+            "Monsters & Co.": "paura",
+            "Alla ricerca di Nemo": "mare",
+            "Gli Incredibili": "supereroi",
+            "Cars": "velocità",
+            "Ratatouille": "cucina",
+            "WALL•E": "robot",
+            "Up": "viaggio",
+            "Inside Out": "emozioni",
+            "Alla ricerca di Dory": "memoria",
+            "Coco": "musica",
+            "Onward - Oltre la magia": "fratelli",
+            "Soul": "vita",
+            "Luca": "estate",
+            "Red": "crescere",
+            "Lightyear - La vera storia di Buzz": "spazio",
+            "Elemental": "opposti"
+        },
+
+        specific_places: {
+            "Fiume Nilo": "acqua",
+            "Foresta Amazzonica": "verde",
+            "Torre Eiffel": "altezza",
+            "Colosseo": "antico",
+            "Big Ben": "tempo",
+            "Statua della Libertà": "simbolo",
+            "Grande Muraglia cinese": "difesa",
+            "Taj Mahal": "amore",
+            "Piramidi di Giza": "deserto",
+            "Machu Picchu": "montagna",
+            "Cristo Redentore": "religione",
+            "Acropoli di Atene": "antico",
+            "Sagrada Familia": "architettura",
+            "Stonehenge": "mistero",
+            "Cattedrale di Notre-Dame": "religione",
+            "Golden Gate Bridge": "rosso",
+            "Grand Canyon": "roccia",
+            "Monte Everest": "freddo",
+            "Basilica di San Pietro": "religione",
+            "Empire State Building": "altezza",
+            "Petra": "roccia",
+            "Burj Khalifa": "lusso",
+            "Monte Fuji": "neve",
+            "Cascate del Niagara": "acqua",
+            "Torre di Pisa": "Italia",
+            "Isola di Pasqua": "mistero",
+            "Cattedrale di San Basilio": "colori",
+            "Basilica di Santa Sofia": "storia",
+            "Duomo di Milano": "piazza",
+            "Duomo di Siena": "marmo",
+            "Duomo di Orvieto": "collina",
+            "Grande Barriera Corallina": "mare",
+            "Cascate delle Marmore": "Italia",
+            "Piazza San Marco": "turisti",
+            "Chichén Itzá": "civiltà",
+            "Ponte di Brooklyn": "città",
+            "Times Square": "luci",
+            "Hollywood Sign": "cinema",
+            "Parco Nazionale di Yosemite": "natura",
+            "Disneyland": "divertimento",
+            "Valle Sacra degli Incas": "montagna",
+            "Fontana di Trevi": "desiderio",
+            "Pantheon": "antico",
+            "Arena di Verona": "musica",
+            "Palazzo di Versailles": "re",
+            "Monte Kilimanjaro": "Africa",
+            "Hollywood Walk of Fame": "fama",
+            "Museo del Louvre": "arte",
+            "La Casa Bianca": "potere",
+            "Area 51": "segreto",
+            "Città del Vaticano": "piccolo",
+            "London Eye": "panorama",
+            "Antelope Canyon": "roccia",
+            "Città Maya di Tikal": "giungla",
+            "Il Partenone": "colonne",
+            "Arco di Trionfo": "vittoria",
+            "Valle della Morte": "caldo",
+            "Deserto del Sahara": "sabbia",
+            "Lago di Como": "vacanza",
+            "Mar Morto": "sale",
+            "Linee di Nazca": "mistero",
+            "Blue Lagoon": "relax",
+            "Fiordi norvegesi": "freddo",
+            "Monumento a Lincoln": "America",
+            "Costiera Amalfitana": "estate",
+            "Le Cinque Terre": "colori",
+            "Palazzo Ducale": "storia",
+            "Campidoglio degli Stati Uniti": "politica",
+            "Il Cremlino": "politica",
+            "Alcatraz": "prigione",
+            "Tempio del Cielo": "Cina",
+            "Tempio di Kyoto": "silenzio",
+            "Teatro alla Scala": "musica",
+            "Grand Bazaar": "caos",
+            "Torre di Londra": "storia",
+            "Palazzo Reale di Amsterdam": "re",
+            "Muro di Berlino": "divisione",
+            "Palazzo di Cnosso": "mito",
+            "Palazzo dell'Alhambra": "giardini",
+            "Blue Mosque": "cupole",
+            "Cattedrale di San Marco": "oro",
+            "Galleria degli Uffizi": "arte",
+            "La Grande Sfinge di Giza": "deserto",
+            "Monte Rushmore": "America"
+        }
+    };
 
     // Game state
     const gameState = {
         players: DEFAULT_PLAYER_NAMES.slice(0, 3),
         numPlayers: 3,
-        numSpies: 1,
-        spyIndices: [],
+        numImpostors: 1,
+        impostorIndices: [],
         currentPlayerIndex: 0,
         selectedTopics: [],
         topicWords: {
@@ -309,9 +679,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 "Joker",
                 "Parasite",
                 "La La Land",
-                "The Queen's Gambit",
                 "The Bear",
-                "Severance",
                 "Ted Lasso",
                 "Mindhunter",
                 "Sex Education",
@@ -359,7 +727,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 "The Prestige",
                 "The Departed",
                 "Zodiac",
-                "Se7en",
                 "Il curioso caso di Benjamin Button",
                 "The Revenant",
                 "Gomorra",
@@ -470,6 +837,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 "Rocky",
                 "Oppenheimer"
             ],
+
+            oggetti_comuni: Object.keys(HINTS.oggetti_comuni),
 
             disney: [
                 "Biancaneve e i sette nani",
@@ -590,7 +959,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 "Mar Morto",
                 "Linee di Nazca",
                 "Blue Lagoon",
-                "Il Colosseo",
                 "Fiordi norvegesi",
                 "Monumento a Lincoln",
                 "Costiera Amalfitana",
@@ -600,7 +968,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 "Il Cremlino",
                 "Alcatraz",
                 "Tempio del Cielo",
-                "Mount Fuji",
                 "Tempio di Kyoto",
                 "Teatro alla Scala",
                 "Grand Bazaar",
@@ -659,7 +1026,7 @@ document.addEventListener('DOMContentLoaded', function() {
             generic_geography: "Elementi geografici generici",
             filmtv: "Film e Serie TV",
             disney: "Disney e Pixar",
-            specific_places: "Luoghi Specifici",
+            specific_places: "Luoghi famosi",
             professions: "Professioni",
             oggetti_comuni: "Oggetti comuni"
         },
@@ -668,6 +1035,10 @@ document.addEventListener('DOMContentLoaded', function() {
         currentTopic: "",
         currentHint: "",
         hintMode: false,
+        impostorCanBeFirst: true,
+        clownEnabled: false,
+        clownIndex: -1,
+        firstPlayerIndex: 0,
         usedWords: [],
         timer: {
             minutes: 10,
@@ -691,14 +1062,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const p_increaseBtn = document.getElementById('p_increaseBtn');
     const playerCount = document.getElementById('playerCount');
     const playerFields = document.getElementById('playerFields');
-    const s_decreaseBtn = document.getElementById('s_decreaseBtn');
-    const s_increaseBtn = document.getElementById('s_increaseBtn');
-    const spiesCount = document.getElementById('spiesCount');
+    const i_decreaseBtn = document.getElementById('i_decreaseBtn');
+    const i_increaseBtn = document.getElementById('i_increaseBtn');
+    const impostorsCount = document.getElementById('impostorsCount');
     const startGameBtn = document.getElementById('startGameBtn');
     const hintModeToggle = document.getElementById('hintModeToggle');
+    const impostorFirstToggle = document.getElementById('impostorFirstToggle');
+    const clownToggle = document.getElementById('clownToggle');
     const hintModeBox = document.getElementById('hintModeBox');
-    const hintModeNote = document.getElementById('hintModeNote');
-    const topicsSection = document.getElementById('topicsSection');
     
     // DOM Elements - Player Pass
     const currentPlayerName = document.getElementById('currentPlayerName');
@@ -706,25 +1077,31 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // DOM Elements - Player Role
     const citizenRole = document.getElementById('citizenRole');
-    const spyRole = document.getElementById('spyRole');
+    const impostorRole = document.getElementById('impostorRole');
     const wordDisplay = document.getElementById('wordDisplay');
     const topicDisplay = document.getElementById('topicDisplay');
-    const topicDisplaySpy = document.getElementById('topicDisplaySpy');
-    const otherSpiesContainer = document.getElementById('otherSpiesContainer');
-    const spyHintContainer = document.getElementById('spyHintContainer');
-    const spyHintDisplay = document.getElementById('spyHintDisplay');
+    const topicDisplayImpostor = document.getElementById('topicDisplayImpostor');
+    const otherImpostorsContainer = document.getElementById('otherImpostorsContainer');
+    const impostorHintContainer = document.getElementById('impostorHintContainer');
+    const impostorHintDisplay = document.getElementById('impostorHintDisplay');
+    const clownRole = document.getElementById('clownRole');
+    const clownWordDisplay = document.getElementById('clownWordDisplay');
+    const topicDisplayClown = document.getElementById('topicDisplayClown');
     const gotItBtn = document.getElementById('gotItBtn');
     
     // DOM Elements - Game Play
+    const firstPlayerName = document.getElementById('firstPlayerName');
     const timerDisplay = document.getElementById('timerDisplay');
     const timerBtn = document.getElementById('timerBtn');
-    const revealSpiesBtn = document.getElementById('revealSpiesBtn');
+    const revealImpostorsBtn = document.getElementById('revealImpostorsBtn');
     
     // DOM Elements - Game End
     const finalWordDisplay = document.getElementById('finalWordDisplay');
     const finalTopicDisplay = document.getElementById('finalTopicDisplay');
     const finalHintDisplay = document.getElementById('finalHintDisplay');
-    const spyListDisplay = document.getElementById('spyListDisplay');
+    const impostorListDisplay = document.getElementById('impostorListDisplay');
+    const clownRevealSection = document.getElementById('clownRevealSection');
+    const clownRevealName = document.getElementById('clownRevealName');
     const newGameBtn = document.getElementById('newGameBtn');
     
     // Create background particles
@@ -742,10 +1119,10 @@ document.addEventListener('DOMContentLoaded', function() {
             setTimeout(() => playerCount.classList.remove('pulse'), 300);
             updatePlayerFields();
             
-            // Adjust spies if needed
-            if (gameState.numSpies > Math.floor(gameState.numPlayers / 2)) {
-                gameState.numSpies = Math.floor(gameState.numPlayers / 2);
-                spiesCount.textContent = gameState.numSpies;
+            // Adjust impostors if needed
+            if (gameState.numImpostors > Math.floor(gameState.numPlayers / 2)) {
+                gameState.numImpostors = Math.floor(gameState.numPlayers / 2);
+                impostorsCount.textContent = gameState.numImpostors;
             }
         }
     });
@@ -760,52 +1137,78 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    s_decreaseBtn.addEventListener('click', function() {
-        if (gameState.numSpies > MIN_SPIES) {
-            gameState.numSpies--;
-            spiesCount.textContent = gameState.numSpies;
-            spiesCount.classList.add('pulse');
-            setTimeout(() => spiesCount.classList.remove('pulse'), 300);
+    i_decreaseBtn.addEventListener('click', function() {
+        if (gameState.numImpostors > MIN_IMPOSTORS) {
+            gameState.numImpostors--;
+            impostorsCount.textContent = gameState.numImpostors;
+            impostorsCount.classList.add('pulse');
+            setTimeout(() => impostorsCount.classList.remove('pulse'), 300);
         }
     });
     
-    s_increaseBtn.addEventListener('click', function() {
-        // Make sure there are more non-spies than spies
-        if (gameState.numSpies < Math.floor(gameState.numPlayers / 2)) {
-            gameState.numSpies++;
-            spiesCount.textContent = gameState.numSpies;
-            spiesCount.classList.add('pulse');
-            setTimeout(() => spiesCount.classList.remove('pulse'), 300);
+    i_increaseBtn.addEventListener('click', function() {
+        // Make sure there are more non-impostors than impostors
+        if (gameState.numImpostors < Math.floor(gameState.numPlayers / 2)) {
+            gameState.numImpostors++;
+            impostorsCount.textContent = gameState.numImpostors;
+            impostorsCount.classList.add('pulse');
+            setTimeout(() => impostorsCount.classList.remove('pulse'), 300);
         }
     });
     
+    // Option switches: highlight the box of every switch that is on
+    document.querySelectorAll('.mode-toggle').forEach(box => {
+        const input = box.querySelector('.switch-input');
+        const sync = () => box.classList.toggle('on', input.checked);
+        input.addEventListener('change', sync);
+        sync();
+    });
+
     // Event Listeners - Hint mode switch
     hintModeToggle.addEventListener('change', updateHintModeUI);
     updateHintModeUI();
 
     function updateHintModeUI() {
         gameState.hintMode = hintModeToggle.checked;
-        hintModeBox.classList.toggle('on', gameState.hintMode);
-        // In hint mode the topics are not used: hide them and show a short note
-        topicsSection.style.display = gameState.hintMode ? 'none' : 'block';
-        hintModeNote.style.display = gameState.hintMode ? 'block' : 'none';
+
+        // In hint mode, hide the topics without hints and those merged into a broader topic
+        document.querySelectorAll('.topic-checkbox').forEach(checkbox => {
+            const topic = checkbox.value;
+            const unavailable = gameState.hintMode && (!HINTS[topic] || topic in HINT_MODE_MERGED_TOPICS);
+            checkbox.disabled = unavailable;
+            checkbox.closest('.topic-item').classList.toggle('unavailable', unavailable);
+        });
     }
 
     // Event Listeners - Start Game
     startGameBtn.addEventListener('click', function() {
         // Check if at least one topic is selected
         const selectedTopics = [];
-        document.querySelectorAll('.topic-checkbox:checked').forEach(checkbox => {
+        document.querySelectorAll('.topic-checkbox:checked:not(:disabled)').forEach(checkbox => {
             selectedTopics.push(checkbox.value);
         });
         
-        if (!gameState.hintMode && selectedTopics.length === 0) {
-            alert('Please select at least one topic.');
+        if (selectedTopics.length === 0) {
+            alert(gameState.hintMode
+                ? 'Please select at least one topic that has hints.'
+                : 'Please select at least one topic.');
             return;
         }
         
         // Update selected topics
+        // In hint mode, a selected broader topic also brings in the topics merged into it
+        if (gameState.hintMode) {
+            Object.entries(HINT_MODE_MERGED_TOPICS).forEach(([topic, target]) => {
+                if (selectedTopics.includes(target) && !selectedTopics.includes(topic)) {
+                    selectedTopics.push(topic);
+                }
+            });
+        }
         gameState.selectedTopics = selectedTopics;
+
+        // Read the game options
+        gameState.impostorCanBeFirst = impostorFirstToggle.checked;
+        gameState.clownEnabled = clownToggle.checked;
         
         // Update player names
         document.querySelectorAll('.player-input').forEach((input, index) => {
@@ -837,6 +1240,7 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             // All players have seen their roles
             showScreen('gamePlay');
+            firstPlayerName.textContent = gameState.players[gameState.firstPlayerIndex];
             resetTimer();
         }
     });
@@ -856,7 +1260,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    revealSpiesBtn.addEventListener('click', function() {
+    revealImpostorsBtn.addEventListener('click', function() {
         // Stop the timer if it's running
         if (gameState.timer.isRunning) {
             clearInterval(gameState.timer.interval);
@@ -917,51 +1321,40 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function prepareGame() {
-        // Assign spy roles
-        gameState.spyIndices = [];
+        // Assign impostor roles
+        gameState.impostorIndices = [];
         
-        // Randomly select spies
-        while (gameState.spyIndices.length < gameState.numSpies) {
+        // Randomly select impostors
+        while (gameState.impostorIndices.length < gameState.numImpostors) {
             const randomIndex = Math.floor(Math.random() * gameState.numPlayers);
-            if (!gameState.spyIndices.includes(randomIndex)) {
-                gameState.spyIndices.push(randomIndex);
+            if (!gameState.impostorIndices.includes(randomIndex)) {
+                gameState.impostorIndices.push(randomIndex);
             }
         }
         
-        // Select a random word (and a hint for the spies in hint mode)
-        if (gameState.hintMode) {
-            selectRandomHintPair();
-        } else {
-            gameState.currentHint = "";
-            selectRandomWord();
-        }
-    }
+        const allIndices = Array.from({ length: gameState.numPlayers }, (_, i) => i);
+        const nonImpostors = allIndices.filter(i => !gameState.impostorIndices.includes(i));
+        const randomItem = list => list[Math.floor(Math.random() * list.length)];
 
-    function selectRandomHintPair() {
-        // Skip words already played in this session
-        let available = HINT_WORD_PAIRS.filter(pair => !gameState.usedWords.includes(pair[0]));
+        // Pick the clown among the players who are not impostors
+        gameState.clownIndex = gameState.clownEnabled ? randomItem(nonImpostors) : -1;
 
-        // If every word has been used, start over
-        if (available.length === 0) {
-            gameState.usedWords = gameState.usedWords.filter(
-                word => !HINT_WORD_PAIRS.some(pair => pair[0] === word)
-            );
-            available = HINT_WORD_PAIRS;
-        }
+        // Pick who speaks first (never an impostor if that option is off)
+        gameState.firstPlayerIndex = randomItem(gameState.impostorCanBeFirst ? allIndices : nonImpostors);
 
-        const [word, hint] = available[Math.floor(Math.random() * available.length)];
-
-        gameState.currentWord = word;
-        gameState.currentHint = hint;
-        gameState.currentTopic = HINT_TOPIC;
-        gameState.usedWords.push(word);
+        // Select a random word (and its hint for the impostors in hint mode)
+        selectRandomWord();
     }
     
     function selectRandomWord() {
-        // Get all words from selected topics
+        // Get all words from selected topics (in hint mode, only words that have a hint)
         let allWords = [];
         gameState.selectedTopics.forEach(topic => {
-            allWords = allWords.concat(gameState.topicWords[topic]);
+            let words = gameState.topicWords[topic];
+            if (gameState.hintMode) {
+                words = words.filter(word => HINTS[topic] && HINTS[topic][word]);
+            }
+            allWords = allWords.concat(words);
         });
         
         // Filter out used words
@@ -988,7 +1381,9 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Update game state
         gameState.currentWord = word;
-        gameState.currentTopic = wordTopic;
+        gameState.currentHint = gameState.hintMode ? HINTS[wordTopic][word] : "";
+        // In hint mode, a word from a merged topic is shown under the broader topic
+        gameState.currentTopic = (gameState.hintMode && HINT_MODE_MERGED_TOPICS[wordTopic]) || wordTopic;
         gameState.usedWords.push(word);
     }
     
@@ -1003,44 +1398,50 @@ document.addEventListener('DOMContentLoaded', function() {
     function showPlayerRole() {
         // Hide both role divs initially
         citizenRole.style.display = 'none';
-        spyRole.style.display = 'none';
+        impostorRole.style.display = 'none';
+        clownRole.style.display = 'none';
         
-        // Check if the current player is a spy
-        const isSpy = gameState.spyIndices.includes(gameState.currentPlayerIndex);
+        // Check if the current player is a impostor
+        const isImpostor = gameState.impostorIndices.includes(gameState.currentPlayerIndex);
         
-        if (isSpy) {
-            // Show spy role
-            spyRole.style.display = 'block';
-            topicDisplaySpy.textContent = `Topic: ${gameState.topicNames[gameState.currentTopic]}`;
+        if (isImpostor) {
+            // Show impostor role
+            impostorRole.style.display = 'block';
+            topicDisplayImpostor.textContent = `Topic: ${gameState.topicNames[gameState.currentTopic]}`;
 
-            // In hint mode, show the hint word to the spy
+            // In hint mode, show the hint word to the impostor
             if (gameState.hintMode && gameState.currentHint) {
-                spyHintDisplay.textContent = gameState.currentHint;
-                spyHintContainer.style.display = 'block';
+                impostorHintDisplay.textContent = gameState.currentHint;
+                impostorHintContainer.style.display = 'block';
             } else {
-                spyHintContainer.style.display = 'none';
+                impostorHintContainer.style.display = 'none';
             }
             
-            // Check if there are multiple spies
-            if (gameState.spyIndices.length > 1) {
-                otherSpiesContainer.style.display = 'block';
-                otherSpiesContainer.innerHTML = '<p>The other spies are:</p>';
+            // Check if there are multiple impostors
+            if (gameState.impostorIndices.length > 1) {
+                otherImpostorsContainer.style.display = 'block';
+                otherImpostorsContainer.innerHTML = '<p>The other impostors are:</p>';
                 
-                // Get other spy indices (all spies except current player)
-                const otherSpyIndices = gameState.spyIndices.filter(index => index !== gameState.currentPlayerIndex);
+                // Get other impostor indices (all impostors except current player)
+                const otherImpostorIndices = gameState.impostorIndices.filter(index => index !== gameState.currentPlayerIndex);
                 
-                // Create elements for each other spy
-                otherSpyIndices.forEach(spyIndex => {
-                    const spyName = gameState.players[spyIndex];
-                    const spyElement = document.createElement('span');
-                    spyElement.className = 'other-spy-name';
-                    spyElement.textContent = spyName;
-                    otherSpiesContainer.appendChild(spyElement);
+                // Create elements for each other impostor
+                otherImpostorIndices.forEach(impostorIndex => {
+                    const impostorName = gameState.players[impostorIndex];
+                    const impostorElement = document.createElement('span');
+                    impostorElement.className = 'other-impostor-name';
+                    impostorElement.textContent = impostorName;
+                    otherImpostorsContainer.appendChild(impostorElement);
                 });
             } else {
-                // If only one spy, hide the container
-                otherSpiesContainer.style.display = 'none';
+                // If only one impostor, hide the container
+                otherImpostorsContainer.style.display = 'none';
             }
+        } else if (gameState.currentPlayerIndex === gameState.clownIndex) {
+            // Show clown role: knows the word, wins if voted
+            clownRole.style.display = 'block';
+            clownWordDisplay.textContent = gameState.currentWord;
+            topicDisplayClown.textContent = `Topic: ${gameState.topicNames[gameState.currentTopic]}`;
         } else {
             // Show citizen role with the word
             citizenRole.style.display = 'block';
@@ -1098,34 +1499,42 @@ document.addEventListener('DOMContentLoaded', function() {
         finalWordDisplay.textContent = gameState.currentWord;
         finalTopicDisplay.textContent = `Topic: ${gameState.topicNames[gameState.currentTopic]}`;
 
-        // In hint mode, also reveal the hint the spies received
+        // In hint mode, also reveal the hint the impostors received
         if (gameState.hintMode && gameState.currentHint) {
-            finalHintDisplay.textContent = `Spy hint: ${gameState.currentHint}`;
+            finalHintDisplay.textContent = `Impostor hint: ${gameState.currentHint}`;
             finalHintDisplay.style.display = 'block';
         } else {
             finalHintDisplay.style.display = 'none';
         }
         
-        // Show the spies
-        spyListDisplay.innerHTML = '';
-        spyListDisplay.style.display = 'block';
+        // Show the impostors
+        impostorListDisplay.innerHTML = '';
+        impostorListDisplay.style.display = 'block';
+
+        // Reveal the clown, if there was one
+        if (gameState.clownIndex >= 0) {
+            clownRevealName.textContent = gameState.players[gameState.clownIndex];
+            clownRevealSection.style.display = 'block';
+        } else {
+            clownRevealSection.style.display = 'none';
+        }
         
-        if (gameState.spyIndices.length > 0) {
-            gameState.spyIndices.forEach(spyIndex => {
-                const spyName = gameState.players[spyIndex];
-                const spyElement = document.createElement('div');
-                spyElement.textContent = spyName;
-                spyListDisplay.appendChild(spyElement);
+        if (gameState.impostorIndices.length > 0) {
+            gameState.impostorIndices.forEach(impostorIndex => {
+                const impostorName = gameState.players[impostorIndex];
+                const impostorElement = document.createElement('div');
+                impostorElement.textContent = impostorName;
+                impostorListDisplay.appendChild(impostorElement);
             });
         } else {
-            spyListDisplay.textContent = 'No spies in this game!';
+            impostorListDisplay.textContent = 'No impostors in this game!';
         }
     }
     
     function resetGame() {
         // Reset game state
         gameState.currentPlayerIndex = 0;
-        gameState.spyIndices = [];
+        gameState.impostorIndices = [];
         
         // Stop timer if running
         if (gameState.timer.isRunning) {
