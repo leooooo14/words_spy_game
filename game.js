@@ -9,6 +9,158 @@ document.addEventListener('DOMContentLoaded', function() {
         "Player 11", "Player 12", "Player 13", "Player 14", "Player 15"
     ];
     
+    // Hint mode: the word is picked from this list and the spy gets the paired hint.
+    // Format: [word, hint]. Hints don't need to be unique.
+    const HINT_TOPIC = "oggetti_comuni";
+    const HINT_WORD_PAIRS = [
+        ["palla", "rotondo"],
+        ["sedia", "casa"],
+        ["compasso", "studio"],
+        ["scuola", "mattina"],
+        ["capra", "animale"],
+        ["cappuccino", "colazione"],
+        ["vaso", "fragile"],
+        ["prosciutto", "salato"],
+        ["cappello", "testa"],
+        ["peperoncino", "caldo"],
+        ["sole", "caldo"],
+        ["ombrello", "autunno"],
+        ["forchetta", "tavola"],
+        ["cuscino", "morbido"],
+        ["specchio", "bagno"],
+        ["orologio", "metallo"],
+        ["chiave", "tasca"],
+        ["candela", "luce"],
+        ["spazzolino", "bagno"],
+        ["frigorifero", "cucina"],
+        ["pizza", "cena"],
+        ["gelato", "dolce"],
+        ["bicicletta", "parco"],
+        ["libro", "carta"],
+        ["matita", "legno"],
+        ["telefono", "tasca"],
+        ["lampadina", "luce"],
+        ["zaino", "viaggio"],
+        ["scarpa", "pelle"],
+        ["occhiali", "faccia"],
+        ["coltello", "cucina"],
+        ["pentola", "metallo"],
+        ["tazza", "ceramica"],
+        ["finestra", "casa"],
+        ["porta", "legno"],
+        ["letto", "notte"],
+        ["divano", "morbido"],
+        ["televisione", "salotto"],
+        ["chitarra", "musica"],
+        ["pianoforte", "pesante"],
+        ["banana", "giallo"],
+        ["mela", "rosso"],
+        ["limone", "giallo"],
+        ["arancia", "succo"],
+        ["uovo", "colazione"],
+        ["latte", "bianco"],
+        ["formaggio", "giallo"],
+        ["pane", "forno"],
+        ["caffè", "amaro"],
+        ["vino", "festa"],
+        ["birra", "bar"],
+        ["cioccolato", "dolce"],
+        ["miele", "colazione"],
+        ["pasta", "pranzo"],
+        ["spaghetti", "cena"],
+        ["cane", "parco"],
+        ["gatto", "pelo"],
+        ["pesce", "mare"],
+        ["cavallo", "veloce"],
+        ["mucca", "fattoria"],
+        ["pecora", "bianco"],
+        ["gallina", "mattina"],
+        ["elefante", "grigio"],
+        ["leone", "pericoloso"],
+        ["ape", "estate"],
+        ["ragno", "paura"],
+        ["serpente", "paura"],
+        ["treno", "viaggio"],
+        ["aereo", "cielo"],
+        ["nave", "viaggio"],
+        ["automobile", "strada"],
+        ["semaforo", "colori"],
+        ["ospedale", "edificio"],
+        ["spiaggia", "estate"],
+        ["neve", "freddo"],
+        ["pioggia", "grigio"],
+        ["luna", "cielo"],
+        ["stella", "notte"],
+        ["albero", "verde"],
+        ["fiore", "primavera"],
+        ["erba", "verde"],
+        ["montagna", "alto"],
+        ["fuoco", "caldo"],
+        ["ghiaccio", "freddo"],
+        ["computer", "lavoro"],
+        ["lavatrice", "casa"],
+        ["aspirapolvere", "rumore"],
+        ["forbici", "ufficio"],
+        ["colla", "bambini"],
+        ["martello", "rumore"],
+        ["cacciavite", "garage"],
+        ["scala", "alto"],
+        ["torta", "festa"],
+        ["regalo", "sorpresa"],
+        ["palloncino", "bambini"],
+        ["maschera", "faccia"],
+        ["calzino", "coppia"],
+        ["guanto", "inverno"],
+        ["sciarpa", "inverno"],
+        ["cintura", "pelle"],
+        ["borsa", "negozio"],
+        ["portafoglio", "tasca"],
+        ["moneta", "rotondo"],
+        ["dado", "gioco"],
+        ["carte da gioco", "gioco"],
+        ["scacchi", "pensare"],
+        ["medaglia", "sport"],
+        ["corona", "oro"],
+        ["spada", "storia"],
+        ["castello", "antico"],
+        ["faro", "mare"],
+        ["tenda", "vacanza"],
+        ["sapone", "pulito"],
+        ["asciugamano", "bagno"],
+        ["doccia", "acqua"],
+        ["dentifricio", "pulito"],
+        ["profumo", "regalo"],
+        ["rossetto", "rosso"],
+        ["pettine", "mattina"],
+        ["anello", "oro"],
+        ["termometro", "medico"],
+        ["cerotto", "pelle"],
+        ["siringa", "paura"],
+        ["bandiera", "colori"],
+        ["mappa", "viaggio"],
+        ["bussola", "avventura"],
+        ["microfono", "musica"],
+        ["fotografia", "vacanza"],
+        ["cartolina", "carta"],
+        ["busta", "carta"],
+        ["calendario", "muro"],
+        ["sveglia", "mattina"],
+        ["tappo", "piccolo"],
+        ["bottiglia", "vetro"],
+        ["cannuccia", "plastica"],
+        ["popcorn", "salato"],
+        ["biglietto", "viaggio"],
+        ["zucca", "autunno"],
+        ["albero di Natale", "inverno"],
+        ["pupazzo di neve", "bianco"],
+        ["carota", "orto"],
+        ["patata", "terra"],
+        ["pomodoro", "orto"],
+        ["cipolla", "cucina"],
+        ["aglio", "odore"],
+        ["fungo", "autunno"]
+    ];
+
     // Game state
     const gameState = {
         players: DEFAULT_PLAYER_NAMES.slice(0, 3),
@@ -508,11 +660,14 @@ document.addEventListener('DOMContentLoaded', function() {
             filmtv: "Film e Serie TV",
             disney: "Disney e Pixar",
             specific_places: "Luoghi Specifici",
-            professions: "Professioni"
+            professions: "Professioni",
+            oggetti_comuni: "Oggetti comuni"
         },
 
         currentWord: "",
         currentTopic: "",
+        currentHint: "",
+        hintMode: false,
         usedWords: [],
         timer: {
             minutes: 10,
@@ -540,6 +695,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const s_increaseBtn = document.getElementById('s_increaseBtn');
     const spiesCount = document.getElementById('spiesCount');
     const startGameBtn = document.getElementById('startGameBtn');
+    const hintModeToggle = document.getElementById('hintModeToggle');
+    const hintModeBox = document.getElementById('hintModeBox');
+    const hintModeNote = document.getElementById('hintModeNote');
+    const topicsSection = document.getElementById('topicsSection');
     
     // DOM Elements - Player Pass
     const currentPlayerName = document.getElementById('currentPlayerName');
@@ -552,6 +711,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const topicDisplay = document.getElementById('topicDisplay');
     const topicDisplaySpy = document.getElementById('topicDisplaySpy');
     const otherSpiesContainer = document.getElementById('otherSpiesContainer');
+    const spyHintContainer = document.getElementById('spyHintContainer');
+    const spyHintDisplay = document.getElementById('spyHintDisplay');
     const gotItBtn = document.getElementById('gotItBtn');
     
     // DOM Elements - Game Play
@@ -562,6 +723,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // DOM Elements - Game End
     const finalWordDisplay = document.getElementById('finalWordDisplay');
     const finalTopicDisplay = document.getElementById('finalTopicDisplay');
+    const finalHintDisplay = document.getElementById('finalHintDisplay');
     const spyListDisplay = document.getElementById('spyListDisplay');
     const newGameBtn = document.getElementById('newGameBtn');
     
@@ -617,6 +779,18 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
+    // Event Listeners - Hint mode switch
+    hintModeToggle.addEventListener('change', updateHintModeUI);
+    updateHintModeUI();
+
+    function updateHintModeUI() {
+        gameState.hintMode = hintModeToggle.checked;
+        hintModeBox.classList.toggle('on', gameState.hintMode);
+        // In hint mode the topics are not used: hide them and show a short note
+        topicsSection.style.display = gameState.hintMode ? 'none' : 'block';
+        hintModeNote.style.display = gameState.hintMode ? 'block' : 'none';
+    }
+
     // Event Listeners - Start Game
     startGameBtn.addEventListener('click', function() {
         // Check if at least one topic is selected
@@ -625,7 +799,7 @@ document.addEventListener('DOMContentLoaded', function() {
             selectedTopics.push(checkbox.value);
         });
         
-        if (selectedTopics.length === 0) {
+        if (!gameState.hintMode && selectedTopics.length === 0) {
             alert('Please select at least one topic.');
             return;
         }
@@ -754,8 +928,33 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
         
-        // Select a random word
-        selectRandomWord();
+        // Select a random word (and a hint for the spies in hint mode)
+        if (gameState.hintMode) {
+            selectRandomHintPair();
+        } else {
+            gameState.currentHint = "";
+            selectRandomWord();
+        }
+    }
+
+    function selectRandomHintPair() {
+        // Skip words already played in this session
+        let available = HINT_WORD_PAIRS.filter(pair => !gameState.usedWords.includes(pair[0]));
+
+        // If every word has been used, start over
+        if (available.length === 0) {
+            gameState.usedWords = gameState.usedWords.filter(
+                word => !HINT_WORD_PAIRS.some(pair => pair[0] === word)
+            );
+            available = HINT_WORD_PAIRS;
+        }
+
+        const [word, hint] = available[Math.floor(Math.random() * available.length)];
+
+        gameState.currentWord = word;
+        gameState.currentHint = hint;
+        gameState.currentTopic = HINT_TOPIC;
+        gameState.usedWords.push(word);
     }
     
     function selectRandomWord() {
@@ -813,6 +1012,14 @@ document.addEventListener('DOMContentLoaded', function() {
             // Show spy role
             spyRole.style.display = 'block';
             topicDisplaySpy.textContent = `Topic: ${gameState.topicNames[gameState.currentTopic]}`;
+
+            // In hint mode, show the hint word to the spy
+            if (gameState.hintMode && gameState.currentHint) {
+                spyHintDisplay.textContent = gameState.currentHint;
+                spyHintContainer.style.display = 'block';
+            } else {
+                spyHintContainer.style.display = 'none';
+            }
             
             // Check if there are multiple spies
             if (gameState.spyIndices.length > 1) {
@@ -890,6 +1097,14 @@ document.addEventListener('DOMContentLoaded', function() {
         // Display the word and topic
         finalWordDisplay.textContent = gameState.currentWord;
         finalTopicDisplay.textContent = `Topic: ${gameState.topicNames[gameState.currentTopic]}`;
+
+        // In hint mode, also reveal the hint the spies received
+        if (gameState.hintMode && gameState.currentHint) {
+            finalHintDisplay.textContent = `Spy hint: ${gameState.currentHint}`;
+            finalHintDisplay.style.display = 'block';
+        } else {
+            finalHintDisplay.style.display = 'none';
+        }
         
         // Show the spies
         spyListDisplay.innerHTML = '';
